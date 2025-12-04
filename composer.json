@@ -1,0 +1,23 @@
+{
+    "name": "resourcehub/resourcehub",
+    "description": "ResourceHub - Sistema de gestión de recursos",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ResourceHub Team"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "ResourceHub\\API\\": "backend/myapi/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
+

@@ -1,13 +1,13 @@
 <?php
-namespace TECWEB\MYAPI\Read;
+namespace ResourceHub\API\Read;
 
-use TECWEB\MYAPI\DataBase;
+use ResourceHub\API\DataBase;
 require_once __DIR__ . '/../DataBase.php';
 
 class Read extends DataBase {
     private $response;
 
-    public function __construct($db = 'marketzone', $user = 'root', $pass = 'JoshelinLun407') {
+    public function __construct($db = 'resourcehub', $user = 'root', $pass = 'JoshelinLun407') {
         $this->response = array();
         parent::__construct($db, $user, $pass);
     }
@@ -40,10 +40,18 @@ class Read extends DataBase {
      * @param string $search - Término de búsqueda
      */
     public function search($search) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA
-        $sql = "SELECT * FROM productos WHERE (id = '{$search}' OR nombre LIKE '%{$search}%' OR marca LIKE '%{$search}%' OR detalles LIKE '%{$search}%') AND eliminado = 0";
+        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
+        $searchPattern = "%{$search}%";
+        $sql = "SELECT * FROM productos WHERE (id = ? OR nombre LIKE ? OR marca LIKE ? OR detalles LIKE ?) AND eliminado = 0";
+        $stmt = $this->conexion->prepare($sql);
         
-        if ($result = $this->conexion->query($sql)) {
+        // Verificar si $search es numérico para la búsqueda por ID
+        $searchId = is_numeric($search) ? (int)$search : 0;
+        $stmt->bind_param("isss", $searchId, $searchPattern, $searchPattern, $searchPattern);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result) {
             // SE OBTIENEN LOS RESULTADOS
             $rows = $result->fetch_all(MYSQLI_ASSOC);
 
@@ -57,8 +65,10 @@ class Read extends DataBase {
             }
             $result->free();
         } else {
-            die('Query Error: ' . mysqli_error($this->conexion));
+            $this->response = array('error' => 'Query Error: ' . $stmt->error);
         }
+        
+        $stmt->close();
     }
 
     /**
@@ -66,10 +76,14 @@ class Read extends DataBase {
      * @param int $id - ID del producto
      */
     public function single($id) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA
-        $sql = "SELECT * FROM productos WHERE id = {$id}";
+        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
+        $sql = "SELECT * FROM productos WHERE id = ?";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        if ($result = $this->conexion->query($sql)) {
+        if ($result) {
             // SE OBTIENE EL RESULTADO
             $row = $result->fetch_assoc();
             
@@ -81,8 +95,10 @@ class Read extends DataBase {
             }
             $result->free();
         } else {
-            die('Query Error: ' . mysqli_error($this->conexion));
+            $this->response = array('error' => 'Query Error: ' . $stmt->error);
         }
+        
+        $stmt->close();
     }
 
     /**
@@ -91,17 +107,21 @@ class Read extends DataBase {
      * @param int $id - ID del producto actual (para excluirlo en modo edición)
      */
     public function singleByName($name, $id = null) {
-        // ESCAPAR CARACTERES ESPECIALES
-        $name = $this->conexion->real_escape_string($name);
-        
-        // SE REALIZA LA QUERY DE BÚSQUEDA
+        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
         if (!empty($id)) {
-            $sql = "SELECT id FROM productos WHERE nombre = '{$name}' AND id != {$id} AND eliminado = 0";
+            $sql = "SELECT id FROM productos WHERE nombre = ? AND id != ? AND eliminado = 0";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("si", $name, $id);
         } else {
-            $sql = "SELECT id FROM productos WHERE nombre = '{$name}' AND eliminado = 0";
+            $sql = "SELECT id FROM productos WHERE nombre = ? AND eliminado = 0";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("s", $name);
         }
         
-        if ($result = $this->conexion->query($sql)) {
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result) {
             // SI ENCUENTRA AL MENOS UN REGISTRO
             $this->response = array(
                 'exists' => $result->num_rows > 0,
@@ -111,9 +131,11 @@ class Read extends DataBase {
         } else {
             $this->response = array(
                 'exists' => false,
-                'message' => 'Error al verificar el nombre'
+                'message' => 'Error al verificar el nombre: ' . $stmt->error
             );
         }
+        
+        $stmt->close();
     }
 
     /**

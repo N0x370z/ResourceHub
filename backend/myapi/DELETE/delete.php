@@ -1,13 +1,13 @@
 <?php
-namespace TECWEB\MYAPI\Delete;
+namespace ResourceHub\API\Delete;
 
-use TECWEB\MYAPI\DataBase;
+use ResourceHub\API\DataBase;
 require_once __DIR__ . '/../DataBase.php';
 
 class Delete extends DataBase {
     private $response;
     
-    public function __construct($db = 'marketzone', $user = 'root', $pass = 'JoshelinLun407') {
+    public function __construct($db = 'resourcehub', $user = 'root', $pass = 'JoshelinLun407') {
         $this->response = array();
         parent::__construct($db, $user, $pass);
     }
@@ -23,15 +23,19 @@ class Delete extends DataBase {
             'message' => 'La consulta falló'
         );
         
-        // SE REALIZA LA QUERY DE ELIMINACIÓN (LÓGICA)
-        $sql = "UPDATE productos SET eliminado=1 WHERE id = {$id}";
+        // SE REALIZA LA QUERY DE ELIMINACIÓN (LÓGICA) usando prepared statement
+        $sql = "UPDATE productos SET eliminado=1 WHERE id = ?";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("i", $id);
         
-        if ($this->conexion->query($sql)) {
+        if ($stmt->execute()) {
             $this->response['status'] = "success";
             $this->response['message'] = "Producto eliminado";
         } else {
-            $this->response['message'] = "ERROR: No se ejecutó $sql. " . mysqli_error($this->conexion);
+            $this->response['message'] = "ERROR: No se ejecutó la consulta. " . $stmt->error;
         }
+        
+        $stmt->close();
     }
 
     /**

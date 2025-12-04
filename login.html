@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - ResourceHub</title>
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: none;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border: none;
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        .card-header .logo {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+        
+        .card-body {
+            padding: 40px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-control.is-valid {
+            border-color: #28a745;
+        }
+        
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        
+        .status-bar {
+            font-size: 0.875rem;
+            margin-top: 5px;
+            min-height: 20px;
+        }
+        
+        .status-bar.error {
+            color: #dc3545;
+        }
+        
+        .status-bar.success {
+            color: #28a745;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 100%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            color: #666;
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .signup-link a {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert-custom {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-custom.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-icon {
+            position: relative;
+        }
+        
+        .input-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        
+        .input-icon .form-control {
+            padding-left: 45px;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="card">
+            <div class="card-header">
+                <div class="logo">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <h2>ResourceHub</h2>
+                <p class="mb-0">Inicia sesión en tu cuenta</p>
+            </div>
+            <div class="card-body">
+                <!-- Mensaje de alerta -->
+                <div class="alert alert-danger alert-custom" id="alert-box">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="alert-message"></span>
+                </div>
+
+                <form id="login-form">
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Correo Electrónico
+                        </label>
+                        <div class="input-icon">
+                            <i class="fas fa-at"></i>
+                            <input type="email" class="form-control" id="email" 
+                                   placeholder="tu@email.com" required autocomplete="email">
+                        </div>
+                        <div class="status-bar" id="status-email"></div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Contraseña
+                        </label>
+                        <div class="input-icon">
+                            <i class="fas fa-key"></i>
+                            <input type="password" class="form-control" id="password" 
+                                   placeholder="••••••••" required autocomplete="current-password">
+                            <i class="fas fa-eye password-toggle" id="toggle-password"></i>
+                        </div>
+                        <div class="status-bar" id="status-password"></div>
+                    </div>
+
+                    <!-- Recordarme -->
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="remember">
+                        <label class="custom-control-label" for="remember">
+                            Recordarme
+                        </label>
+                    </div>
+
+                    <!-- Botón -->
+                    <button type="submit" class="btn btn-primary btn-login" id="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                </form>
+
+                <div class="divider">
+                    <span>¿No tienes cuenta?</span>
+                </div>
+
+                <div class="signup-link">
+                    <a href="signup.html">
+                        <i class="fas fa-user-plus"></i> Crear una cuenta nueva
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Toggle password visibility
+            $('#toggle-password').on('click', function() {
+                const passwordField = $('#password');
+                const icon = $(this);
+                
+                if (passwordField.attr('type') === 'password') {
+                    passwordField.attr('type', 'text');
+                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    passwordField.attr('type', 'password');
+                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+
+            // Validación en tiempo real del email
+            $('#email').on('blur', function() {
+                const email = $(this).val().trim();
+                const statusDiv = $('#status-email');
+                
+                if (email === '') {
+                    statusDiv.removeClass('success').addClass('error')
+                           .text('⚠️ El email es obligatorio');
+                    $(this).addClass('is-invalid').removeClass('is-valid');
+                } else if (!isValidEmail(email)) {
+                    statusDiv.removeClass('success').addClass('error')
+                           .text('⚠️ Email no válido');
+                    $(this).addClass('is-invalid').removeClass('is-valid');
+                } else {
+                    statusDiv.removeClass('error').addClass('success')
+                           .text('✓ Email válido');
+                    $(this).addClass('is-valid').removeClass('is-invalid');
+                }
+            });
+
+            // Validación de contraseña
+            $('#password').on('blur', function() {
+                const password = $(this).val();
+                const statusDiv = $('#status-password');
+                
+                if (password === '') {
+                    statusDiv.removeClass('success').addClass('error')
+                           .text('⚠️ La contraseña es obligatoria');
+                    $(this).addClass('is-invalid').removeClass('is-valid');
+                } else {
+                    statusDiv.text('');
+                    $(this).removeClass('is-invalid is-valid');
+                }
+            });
+
+            // Enviar formulario
+            $('#login-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                const email = $('#email').val().trim();
+                const password = $('#password').val();
+                
+                // Validar campos
+                if (!email || !password) {
+                    showAlert('Por favor completa todos los campos');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    showAlert('El email no es válido');
+                    return;
+                }
+                
+                // Deshabilitar botón
+                const btn = $('#btn-login');
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...');
+                
+                // Enviar petición AJAX
+                $.ajax({
+                    url: 'backend/auth-login.php',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        email: email,
+                        password: password
+                    }),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            // Redirigir según el rol
+                            window.location.href = response.redirect;
+                        } else {
+                            showAlert(response.message);
+                            btn.prop('disabled', false)
+                               .html('<i class="fas fa-sign-in-alt"></i> Iniciar Sesión');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMsg = 'Error al iniciar sesión';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showAlert(errorMsg);
+                        btn.prop('disabled', false)
+                           .html('<i class="fas fa-sign-in-alt"></i> Iniciar Sesión');
+                    }
+                });
+            });
+
+            // Función para validar email
+            function isValidEmail(email) {
+                const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return regex.test(email);
+            }
+
+            // Función para mostrar alertas
+            function showAlert(message) {
+                const alertBox = $('#alert-box');
+                const alertMessage = $('#alert-message');
+                
+                alertMessage.text(message);
+                alertBox.addClass('show');
+                
+                setTimeout(() => {
+                    alertBox.removeClass('show');
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
