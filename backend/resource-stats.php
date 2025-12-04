@@ -1,13 +1,8 @@
 <?php
-/**
- * ResourceHub - Listar Recursos
- * Endpoint para listar todos los recursos activos
- */
-
 require_once __DIR__.'/../vendor/autoload.php';
 use ResourceHub\API\Read\Read;
 
 $resource = new Read('resourcehub');
-$resource->list();
+$resource->getStats();
 echo $resource->getData();
 ?>
