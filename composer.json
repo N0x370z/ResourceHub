@@ -1,23 +1,27 @@
 {
-    "name": "resourcehub/resourcehub",
-    "description": "ResourceHub - Sistema de gestión de recursos",
+    "name": "resourcehub/api",
+    "description": "API REST para gestión de recursos digitales para programadores",
     "type": "project",
     "license": "MIT",
     "authors": [
         {
-            "name": "ResourceHub Team"
+            "name": "Tu Nombre",
+            "email": "tu@email.com"
         }
     ],
-    "require": {
-        "php": ">=7.4"
-    },
     "autoload": {
         "psr-4": {
-            "ResourceHub\\API\\": "backend/myapi/"
+            "ResourceHub\\API\\": "backend/myapi/",
+            "ResourceHub\\API\\Create\\": "backend/myapi/Create/",
+            "ResourceHub\\API\\Read\\": "backend/myapi/Read/",
+            "ResourceHub\\API\\Update\\": "backend/myapi/Update/",
+            "ResourceHub\\API\\Delete\\": "backend/myapi/Delete/"
         }
     },
-    "config": {
-        "optimize-autoloader": true
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
     }
 }
-

@@ -1,4 +1,10 @@
 <?php
+/**
+ * ResourceHub - Clase Read
+ * 
+ * Maneja la lectura de recursos desde la base de datos
+ */
+
 namespace ResourceHub\API\Read;
 
 use ResourceHub\API\DataBase;
@@ -13,137 +19,250 @@ class Read extends DataBase {
     }
 
     /**
-     * Lista todos los productos no eliminados
+     * Lista todos los recursos activos
+     * 
+     * @return void
      */
     public function list() {
-        // SE REALIZA LA QUERY DE BÚSQUEDA
-        if ($result = $this->conexion->query("SELECT * FROM productos WHERE eliminado = 0")) {
-            // SE OBTIENEN LOS RESULTADOS
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
+        try {
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.activo = 1 
+                    ORDER BY r.fecha_subida DESC";
+            
+            $result = $this->conexion->query($sql);
 
-            if (!is_null($rows)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS Y SE MAPEAN AL ARREGLO DE RESPUESTA
-                foreach ($rows as $num => $row) {
-                    foreach ($row as $key => $value) {
-                        $this->response[$num][$key] = utf8_encode($value);
+            if ($result) {
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+                if (!empty($rows)) {
+                    foreach ($rows as $num => $row) {
+                        foreach ($row as $key => $value) {
+                            $this->response[$num][$key] = utf8_encode($value);
+                        }
                     }
                 }
+                $result->free();
+            } else {
+                $this->log_error('Error en list()', ['error' => $this->conexion->error]);
             }
-            $result->free();
-        } else {
-            die('Query Error: ' . mysqli_error($this->conexion));
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en list()', ['exception' => $e->getMessage()]);
         }
     }
 
     /**
-     * Busca productos por ID, nombre, marca o detalles
+     * Busca recursos por término de búsqueda
+     * 
      * @param string $search - Término de búsqueda
+     * @return void
      */
     public function search($search) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
-        $searchPattern = "%{$search}%";
-        $sql = "SELECT * FROM productos WHERE (id = ? OR nombre LIKE ? OR marca LIKE ? OR detalles LIKE ?) AND eliminado = 0";
-        $stmt = $this->conexion->prepare($sql);
-        
-        // Verificar si $search es numérico para la búsqueda por ID
-        $searchId = is_numeric($search) ? (int)$search : 0;
-        $stmt->bind_param("isss", $searchId, $searchPattern, $searchPattern, $searchPattern);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result) {
-            // SE OBTIENEN LOS RESULTADOS
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
+        try {
+            $search = $this->escape($search);
+            
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.activo = 1 AND (
+                        r.titulo LIKE '%{$search}%' OR 
+                        r.descripcion LIKE '%{$search}%' OR 
+                        r.tipo_recurso LIKE '%{$search}%' OR 
+                        r.lenguaje LIKE '%{$search}%' OR 
+                        r.tags LIKE '%{$search}%'
+                    )
+                    ORDER BY r.fecha_subida DESC";
+            
+            $result = $this->conexion->query($sql);
 
-            if (!is_null($rows)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS Y SE MAPEAN AL ARREGLO DE RESPUESTA
-                foreach ($rows as $num => $row) {
-                    foreach ($row as $key => $value) {
-                        $this->response[$num][$key] = utf8_encode($value);
+            if ($result) {
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+                if (!empty($rows)) {
+                    foreach ($rows as $num => $row) {
+                        foreach ($row as $key => $value) {
+                            $this->response[$num][$key] = utf8_encode($value);
+                        }
                     }
                 }
+                $result->free();
             }
-            $result->free();
-        } else {
-            $this->response = array('error' => 'Query Error: ' . $stmt->error);
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en search()', ['exception' => $e->getMessage()]);
         }
-        
-        $stmt->close();
     }
 
     /**
-     * Obtiene un producto específico por ID
-     * @param int $id - ID del producto
+     * Obtiene un recurso específico por ID
+     * 
+     * @param int $id - ID del recurso
+     * @return void
      */
     public function single($id) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
-        $sql = "SELECT * FROM productos WHERE id = ?";
-        $stmt = $this->conexion->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result) {
-            // SE OBTIENE EL RESULTADO
-            $row = $result->fetch_assoc();
+        try {
+            $id = (int)$id;
             
-            if (!is_null($row)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS
-                foreach ($row as $key => $value) {
-                    $this->response[$key] = utf8_encode($value);
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.id = ? AND r.activo = 1";
+            
+            $stmt = $this->ejecutar_consulta($sql, 'i', [$id]);
+            
+            if ($stmt) {
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                
+                if ($row) {
+                    foreach ($row as $key => $value) {
+                        $this->response[$key] = utf8_encode($value);
+                    }
                 }
+                $stmt->close();
             }
-            $result->free();
-        } else {
-            $this->response = array('error' => 'Query Error: ' . $stmt->error);
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en single()', ['exception' => $e->getMessage()]);
         }
-        
-        $stmt->close();
     }
 
     /**
-     * Verifica si existe un producto con el nombre dado
-     * @param string $name - Nombre a verificar
-     * @param int $id - ID del producto actual (para excluirlo en modo edición)
+     * Filtra recursos por tipo
+     * 
+     * @param string $tipo - Tipo de recurso
+     * @return void
      */
-    public function singleByName($name, $id = null) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
-        if (!empty($id)) {
-            $sql = "SELECT id FROM productos WHERE nombre = ? AND id != ? AND eliminado = 0";
-            $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("si", $name, $id);
-        } else {
-            $sql = "SELECT id FROM productos WHERE nombre = ? AND eliminado = 0";
-            $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("s", $name);
+    public function filterByType($tipo) {
+        try {
+            $tipo = $this->escape($tipo);
+            
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.activo = 1 AND r.tipo_recurso = '{$tipo}'
+                    ORDER BY r.fecha_subida DESC";
+            
+            $result = $this->conexion->query($sql);
+
+            if ($result) {
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+                if (!empty($rows)) {
+                    foreach ($rows as $num => $row) {
+                        foreach ($row as $key => $value) {
+                            $this->response[$num][$key] = utf8_encode($value);
+                        }
+                    }
+                }
+                $result->free();
+            }
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en filterByType()', ['exception' => $e->getMessage()]);
         }
-        
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result) {
-            // SI ENCUENTRA AL MENOS UN REGISTRO
-            $this->response = array(
-                'exists' => $result->num_rows > 0,
-                'message' => $result->num_rows > 0 ? 'El nombre ya está registrado' : 'Nombre disponible'
-            );
-            $result->free();
-        } else {
-            $this->response = array(
-                'exists' => false,
-                'message' => 'Error al verificar el nombre: ' . $stmt->error
-            );
+    }
+
+    /**
+     * Filtra recursos por lenguaje
+     * 
+     * @param string $lenguaje - Lenguaje de programación
+     * @return void
+     */
+    public function filterByLanguage($lenguaje) {
+        try {
+            $lenguaje = $this->escape($lenguaje);
+            
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.activo = 1 AND r.lenguaje = '{$lenguaje}'
+                    ORDER BY r.fecha_subida DESC";
+            
+            $result = $this->conexion->query($sql);
+
+            if ($result) {
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+                if (!empty($rows)) {
+                    foreach ($rows as $num => $row) {
+                        foreach ($row as $key => $value) {
+                            $this->response[$num][$key] = utf8_encode($value);
+                        }
+                    }
+                }
+                $result->free();
+            }
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en filterByLanguage()', ['exception' => $e->getMessage()]);
         }
-        
-        $stmt->close();
+    }
+
+    /**
+     * Obtiene estadísticas generales de recursos
+     * 
+     * @return void
+     */
+    public function getStats() {
+        try {
+            $stats = array();
+
+            // Total de recursos
+            $sql = "SELECT COUNT(*) as total FROM recursos WHERE activo = 1";
+            $result = $this->conexion->query($sql);
+            if ($result) {
+                $row = $result->fetch_assoc();
+                $stats['total_recursos'] = (int)$row['total'];
+                $result->free();
+            }
+
+            // Recursos por tipo
+            $sql = "SELECT tipo_recurso, COUNT(*) as cantidad 
+                    FROM recursos 
+                    WHERE activo = 1 
+                    GROUP BY tipo_recurso";
+            $result = $this->conexion->query($sql);
+            if ($result) {
+                $tipos = array();
+                while ($row = $result->fetch_assoc()) {
+                    $tipos[$row['tipo_recurso']] = (int)$row['cantidad'];
+                }
+                $stats['por_tipo'] = $tipos;
+                $result->free();
+            }
+
+            // Recursos por lenguaje
+            $sql = "SELECT lenguaje, COUNT(*) as cantidad 
+                    FROM recursos 
+                    WHERE activo = 1 AND lenguaje IS NOT NULL 
+                    GROUP BY lenguaje";
+            $result = $this->conexion->query($sql);
+            if ($result) {
+                $lenguajes = array();
+                while ($row = $result->fetch_assoc()) {
+                    $lenguajes[$row['lenguaje']] = (int)$row['cantidad'];
+                }
+                $stats['por_lenguaje'] = $lenguajes;
+                $result->free();
+            }
+
+            $this->response = $stats;
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en getStats()', ['exception' => $e->getMessage()]);
+        }
     }
 
     /**
      * Retorna los datos en formato JSON
+     * 
      * @return string - JSON con los datos
      */
     public function getData() {
-        return json_encode($this->response, JSON_PRETTY_PRINT);
+        return json_encode($this->response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }
 ?>
