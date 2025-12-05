@@ -1,9 +1,9 @@
 <?php
 /**
- * ResourceHub - Obtener Recurso Individual
- * Endpoint para obtener un recurso específico por ID
+ * ResourceHub - Filtrar Recursos por Lenguaje
+ * Endpoint para obtener recursos filtrados por lenguaje de programación
  * Método HTTP: GET
- * Parámetros: id (query string)
+ * Parámetros: language (query string)
  */
 
 require_once __DIR__.'/../vendor/autoload.php';
@@ -21,46 +21,38 @@ header('Access-Control-Allow-Headers: Content-Type');
 verificar_metodo('GET');
 
 try {
-    // Validar parámetro ID
-    if (!isset($_GET['id']) || empty($_GET['id'])) {
+    // Validar parámetro de lenguaje
+    if (!isset($_GET['language']) || empty(trim($_GET['language']))) {
         json_response([
             'status' => 'error',
-            'message' => 'ID del recurso requerido'
+            'message' => 'Parámetro de lenguaje requerido'
         ], 400);
     }
     
-    $recurso_id = (int)$_GET['id'];
+    $lenguaje = trim($_GET['language']);
     
-    if ($recurso_id <= 0) {
-        json_response([
-            'status' => 'error',
-            'message' => 'ID inválido'
-        ], 400);
-    }
-    
-    // Obtener el recurso
     $resource = new Read('resourcehub');
-    $resource->single($recurso_id);
+    $resource->filterByLanguage($lenguaje);
     
     $data = json_decode($resource->getData(), true);
     
-    // Verificar si se encontró el recurso
+    // Si no hay datos, retornar array vacío
     if (empty($data)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'Recurso no encontrado'
-        ], 404);
+        $data = [];
     }
     
     json_response([
         'status' => 'success',
-        'data' => $data
+        'data' => $data,
+        'count' => count($data),
+        'filter' => ['language' => $lenguaje]
     ], 200);
     
 } catch (Exception $e) {
     json_response([
         'status' => 'error',
-        'message' => 'Error al obtener recurso: ' . $e->getMessage()
+        'message' => 'Error al filtrar recursos: ' . $e->getMessage()
     ], 500);
 }
 ?>
+

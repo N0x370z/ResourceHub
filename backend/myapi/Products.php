@@ -1,4 +1,13 @@
 <?php
+/**
+ * ResourceHub - Clase Products (Legacy - Compatibilidad)
+ * 
+ * Esta clase mantiene compatibilidad con código legacy que usa "productos"
+ * pero internamente trabaja con la tabla "recursos"
+ * 
+ * @deprecated Se recomienda usar las clases específicas: Create, Read, Update, Delete
+ */
+
 namespace ResourceHub\API;
 
 require_once __DIR__ . '/DataBase.php';
@@ -7,214 +16,489 @@ class Products extends DataBase {
     private $response;
 
     public function __construct($db = 'resourcehub', $user = 'root', $pass = 'JoshelinLun407') {
-        // INICIALIZA EL ARREGLO DE RESPUESTA
         $this->response = array();
-        
-        // LLAMA AL CONSTRUCTOR DE LA CLASE PADRE
         parent::__construct($db, $user, $pass);
     }
 
-    // LISTAR TODOS LOS PRODUCTOS
+    /**
+     * Lista todos los recursos activos
+     * 
+     * @return void
+     */
     public function list() {
-        // SE REALIZA LA QUERY DE BÚSQUEDA
-        if ($result = $this->conexion->query("SELECT * FROM productos WHERE eliminado = 0")) {
-            // SE OBTIENEN LOS RESULTADOS
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-            if (!is_null($rows)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS Y SE MAPEAN AL ARREGLO DE RESPUESTA
-                foreach ($rows as $num => $row) {
-                    foreach ($row as $key => $value) {
-                        $this->response[$num][$key] = utf8_encode($value);
-                    }
-                }
-            }
-            $result->free();
-        } else {
-            die('Query Error: ' . mysqli_error($this->conexion));
-        }
-    }
-
-    // BUSCAR PRODUCTOS
-    public function search($search) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
-        $searchPattern = "%{$search}%";
-        $sql = "SELECT * FROM productos WHERE (id = ? OR nombre LIKE ? OR marca LIKE ? OR detalles LIKE ?) AND eliminado = 0";
-        $stmt = $this->conexion->prepare($sql);
-        
-        // Verificar si $search es numérico para la búsqueda por ID
-        $searchId = is_numeric($search) ? (int)$search : 0;
-        $stmt->bind_param("isss", $searchId, $searchPattern, $searchPattern, $searchPattern);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result) {
-            // SE OBTIENEN LOS RESULTADOS
-            $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-            if (!is_null($rows)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS Y SE MAPEAN AL ARREGLO DE RESPUESTA
-                foreach ($rows as $num => $row) {
-                    foreach ($row as $key => $value) {
-                        $this->response[$num][$key] = utf8_encode($value);
-                    }
-                }
-            }
-            $result->free();
-        } else {
-            $this->response = array('error' => 'Query Error: ' . $stmt->error);
-        }
-        
-        $stmt->close();
-    }
-
-    // OBTENER UN SOLO PRODUCTO POR ID
-    public function single($id) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
-        $sql = "SELECT * FROM productos WHERE id = ?";
-        $stmt = $this->conexion->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result) {
-            // SE OBTIENE EL RESULTADO
-            $row = $result->fetch_assoc();
+        try {
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.activo = 1 
+                    ORDER BY r.fecha_subida DESC";
             
-            if (!is_null($row)) {
-                // SE CODIFICAN A UTF-8 LOS DATOS
-                foreach ($row as $key => $value) {
-                    $this->response[$key] = utf8_encode($value);
+            $result = $this->conexion->query($sql);
+
+            if ($result) {
+                $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+                if (!empty($rows)) {
+                    foreach ($rows as $num => $row) {
+                        foreach ($row as $key => $value) {
+                            $this->response[$num][$key] = utf8_encode($value);
+                        }
+                    }
                 }
+                $result->free();
+            } else {
+                $this->log_error('Error en list()', ['error' => $this->conexion->error]);
             }
-            $result->free();
-        } else {
-            $this->response = array('error' => 'Query Error: ' . $stmt->error);
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en list()', ['exception' => $e->getMessage()]);
         }
-        
-        $stmt->close();
     }
 
-    // OBTENER UN SOLO PRODUCTO POR NOMBRE
-    public function singleByName($name, $id = null) {
-        // SE REALIZA LA QUERY DE BÚSQUEDA usando prepared statement
-        if (!empty($id)) {
-            $sql = "SELECT id FROM productos WHERE nombre = ? AND id != ? AND eliminado = 0";
+    /**
+     * Busca recursos por término de búsqueda
+     * 
+     * @param string $search - Término de búsqueda
+     * @return void
+     */
+    public function search($search) {
+        try {
+            $searchPattern = "%{$search}%";
+            
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.activo = 1 AND (
+                        r.id = ? OR 
+                        r.titulo LIKE ? OR 
+                        r.descripcion LIKE ? OR 
+                        r.tipo_recurso LIKE ? OR 
+                        r.lenguaje LIKE ? OR 
+                        r.tags LIKE ?
+                    )
+                    ORDER BY r.fecha_subida DESC";
+            
             $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("si", $name, $id);
-        } else {
-            $sql = "SELECT id FROM productos WHERE nombre = ? AND eliminado = 0";
-            $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("s", $name);
+            
+            if ($stmt) {
+                // Verificar si $search es numérico para la búsqueda por ID
+                $searchId = is_numeric($search) ? (int)$search : 0;
+                $stmt->bind_param("isssss", $searchId, $searchPattern, $searchPattern, $searchPattern, $searchPattern, $searchPattern);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                if ($result) {
+                    $rows = $result->fetch_all(MYSQLI_ASSOC);
+
+                    if (!empty($rows)) {
+                        foreach ($rows as $num => $row) {
+                            foreach ($row as $key => $value) {
+                                $this->response[$num][$key] = utf8_encode($value);
+                            }
+                        }
+                    }
+                    $result->free();
+                }
+                $stmt->close();
+            } else {
+                $this->log_error('Error en search()', ['error' => $this->conexion->error]);
+            }
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en search()', ['exception' => $e->getMessage()]);
         }
-        
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result) {
-            // SI ENCUENTRA AL MENOS UN REGISTRO
-            $this->response = array(
-                'exists' => $result->num_rows > 0,
-                'message' => $result->num_rows > 0 ? 'El nombre ya está registrado' : 'Nombre disponible'
-            );
-            $result->free();
-        } else {
+    }
+
+    /**
+     * Obtiene un recurso específico por ID
+     * 
+     * @param int $id - ID del recurso
+     * @return void
+     */
+    public function single($id) {
+        try {
+            $id = (int)$id;
+            
+            $sql = "SELECT r.*, u.nombre as nombre_usuario 
+                    FROM recursos r 
+                    LEFT JOIN usuarios u ON r.usuario_id = u.id 
+                    WHERE r.id = ? AND r.activo = 1";
+            
+            $stmt = $this->conexion->prepare($sql);
+            
+            if ($stmt) {
+                $stmt->bind_param("i", $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    
+                    if ($row) {
+                        foreach ($row as $key => $value) {
+                            $this->response[$key] = utf8_encode($value);
+                        }
+                    }
+                    $result->free();
+                }
+                $stmt->close();
+            } else {
+                $this->log_error('Error en single()', ['error' => $this->conexion->error]);
+            }
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en single()', ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Verifica si existe un recurso con el título dado
+     * 
+     * @param string $name - Título a verificar
+     * @param int $id - ID del recurso actual (para excluirlo en modo edición)
+     * @return void
+     */
+    public function singleByName($name, $id = null) {
+        try {
+            if (!empty($id)) {
+                $sql = "SELECT id FROM recursos WHERE titulo = ? AND id != ? AND activo = 1";
+                $stmt = $this->conexion->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("si", $name, $id);
+                }
+            } else {
+                $sql = "SELECT id FROM recursos WHERE titulo = ? AND activo = 1";
+                $stmt = $this->conexion->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("s", $name);
+                }
+            }
+            
+            if ($stmt) {
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                if ($result) {
+                    $this->response = array(
+                        'exists' => $result->num_rows > 0,
+                        'message' => $result->num_rows > 0 ? 'El título ya está registrado' : 'Título disponible'
+                    );
+                    $result->free();
+                } else {
+                    $this->response = array(
+                        'exists' => false,
+                        'message' => 'Error al verificar el título: ' . $stmt->error
+                    );
+                }
+                $stmt->close();
+            } else {
+                $this->response = array(
+                    'exists' => false,
+                    'message' => 'Error al preparar la consulta'
+                );
+            }
+
+        } catch (\Exception $e) {
+            $this->log_error('Excepción en singleByName()', ['exception' => $e->getMessage()]);
             $this->response = array(
                 'exists' => false,
-                'message' => 'Error al verificar el nombre: ' . $stmt->error
+                'message' => 'Error: ' . $e->getMessage()
             );
         }
-        
-        $stmt->close();
     }
 
-    // AGREGAR PRODUCTO
+    /**
+     * Agrega un nuevo recurso
+     * 
+     * @param object $jsonOBJ - Objeto con los datos del recurso
+     * @return void
+     */
     public function add($jsonOBJ) {
-        // SE INICIALIZA LA RESPUESTA
         $this->response = array(
             'status'  => 'error',
-            'message' => 'Ya existe un producto con ese nombre'
+            'message' => 'Error al agregar el recurso'
         );
-        
-        // SE VERIFICA QUE EL NOMBRE NO EXISTA
-        $sql = "SELECT * FROM productos WHERE nombre = '{$jsonOBJ->nombre}' AND eliminado = 0";
-        $result = $this->conexion->query($sql);
-        
-        if ($result->num_rows == 0) {
-            $this->conexion->set_charset("utf8");
-            $sql = "INSERT INTO productos VALUES (null, '{$jsonOBJ->nombre}', '{$jsonOBJ->marca}', '{$jsonOBJ->modelo}', {$jsonOBJ->precio}, '{$jsonOBJ->detalles}', {$jsonOBJ->unidades}, '{$jsonOBJ->imagen}', 0)";
-            
-            if ($this->conexion->query($sql)) {
-                $this->response['status'] = "success";
-                $this->response['message'] = "Producto agregado";
-            } else {
-                $this->response['message'] = "ERROR: No se ejecutó $sql. " . mysqli_error($this->conexion);
+
+        try {
+            // Validar campos obligatorios
+            if (empty($jsonOBJ->titulo) || empty($jsonOBJ->tipo_recurso) || 
+                empty($jsonOBJ->archivo_nombre) || empty($jsonOBJ->archivo_ruta)) {
+                $this->response['message'] = 'Faltan campos obligatorios';
+                return;
             }
+
+            // Verificar si el título ya existe
+            $sql = "SELECT id FROM recursos WHERE titulo = ? AND activo = 1";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("s", $jsonOBJ->titulo);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $this->response['message'] = 'Ya existe un recurso con ese título';
+                $stmt->close();
+                return;
+            }
+            $stmt->close();
+
+            // Preparar datos
+            $titulo = $this->escape($jsonOBJ->titulo);
+            $descripcion = isset($jsonOBJ->descripcion) ? $this->escape($jsonOBJ->descripcion) : '';
+            $tipo_recurso = $this->escape($jsonOBJ->tipo_recurso);
+            $lenguaje = isset($jsonOBJ->lenguaje) ? $this->escape($jsonOBJ->lenguaje) : null;
+            $archivo_nombre = $this->escape($jsonOBJ->archivo_nombre);
+            $archivo_ruta = $this->escape($jsonOBJ->archivo_ruta);
+            $archivo_tamanio = isset($jsonOBJ->archivo_tamanio) ? (int)$jsonOBJ->archivo_tamanio : 0;
+            $tags = isset($jsonOBJ->tags) ? $this->escape($jsonOBJ->tags) : '';
+            $usuario_id = isset($jsonOBJ->usuario_id) ? (int)$jsonOBJ->usuario_id : null;
+
+            // Insertar el recurso
+            if ($lenguaje) {
+                $sql = "INSERT INTO recursos 
+                        (titulo, descripcion, tipo_recurso, lenguaje, archivo_nombre, 
+                         archivo_ruta, archivo_tamanio, tags, usuario_id) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $this->conexion->prepare($sql);
+                $stmt->bind_param("ssssssssi", 
+                    $titulo, $descripcion, $tipo_recurso, $lenguaje, $archivo_nombre,
+                    $archivo_ruta, $archivo_tamanio, $tags, $usuario_id
+                );
+            } else {
+                $sql = "INSERT INTO recursos 
+                        (titulo, descripcion, tipo_recurso, archivo_nombre, 
+                         archivo_ruta, archivo_tamanio, tags, usuario_id) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                $stmt = $this->conexion->prepare($sql);
+                $stmt->bind_param("sssssisi", 
+                    $titulo, $descripcion, $tipo_recurso, $archivo_nombre,
+                    $archivo_ruta, $archivo_tamanio, $tags, $usuario_id
+                );
+            }
+
+            if ($stmt->execute()) {
+                $this->response = array(
+                    'status' => 'success',
+                    'message' => 'Recurso agregado exitosamente',
+                    'data' => array(
+                        'id' => $this->ultimo_id(),
+                        'titulo' => $jsonOBJ->titulo
+                    )
+                );
+            } else {
+                $this->response['message'] = 'Error al insertar: ' . $stmt->error;
+            }
+
+            $stmt->close();
+
+        } catch (\Exception $e) {
+            $this->response['message'] = 'Excepción: ' . $e->getMessage();
+            $this->log_error('Error en add()', ['exception' => $e->getMessage()]);
         }
-        
-        $result->free();
     }
 
-    // ELIMINAR PRODUCTO
+    /**
+     * Elimina lógicamente un recurso
+     * 
+     * @param int $id - ID del recurso a eliminar
+     * @return void
+     */
     public function delete($id) {
-        // SE INICIALIZA LA RESPUESTA
         $this->response = array(
             'status'  => 'error',
-            'message' => 'La consulta falló'
+            'message' => 'Error al eliminar el recurso'
         );
-        
-        // SE REALIZA LA QUERY DE ELIMINACIÓN (LÓGICA)
-        $sql = "UPDATE productos SET eliminado=1 WHERE id = {$id}";
-        
-        if ($this->conexion->query($sql)) {
-            $this->response['status'] = "success";
-            $this->response['message'] = "Producto eliminado";
-        } else {
-            $this->response['message'] = "ERROR: No se ejecutó $sql. " . mysqli_error($this->conexion);
-        }
-    }
 
-    // EDITAR PRODUCTO
-    public function edit($jsonOBJ) {
-        // SE INICIALIZA LA RESPUESTA
-        $this->response = array(
-            'status'  => 'error',
-            'message' => 'Error al actualizar el producto'
-        );
-        
-        // VERIFICAR SI YA EXISTE OTRO PRODUCTO CON EL MISMO NOMBRE
-        $sql = "SELECT * FROM productos WHERE nombre = '{$jsonOBJ->nombre}' AND id != {$jsonOBJ->id} AND eliminado = 0";
-        $result = $this->conexion->query($sql);
-        
-        if ($result->num_rows == 0) {
-            $this->conexion->set_charset("utf8");
-            $sql = "UPDATE productos SET 
-                    nombre = '{$jsonOBJ->nombre}',
-                    marca = '{$jsonOBJ->marca}',
-                    modelo = '{$jsonOBJ->modelo}',
-                    precio = {$jsonOBJ->precio},
-                    detalles = '{$jsonOBJ->detalles}',
-                    unidades = {$jsonOBJ->unidades},
-                    imagen = '{$jsonOBJ->imagen}'
-                    WHERE id = {$jsonOBJ->id}";
-            
-            if ($this->conexion->query($sql)) {
-                $this->response['status'] = "success";
-                $this->response['message'] = "Producto actualizado correctamente";
-            } else {
-                $this->response['message'] = "ERROR: No se ejecutó $sql. " . mysqli_error($this->conexion);
+        try {
+            $id = (int)$id;
+
+            // Verificar que el recurso existe
+            $sql = "SELECT id, titulo FROM recursos WHERE id = ? AND activo = 1";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                $this->response['message'] = 'Recurso no encontrado';
+                $stmt->close();
+                return;
             }
-        } else {
-            $this->response['message'] = "Ya existe un producto con ese nombre";
+
+            $recurso = $result->fetch_assoc();
+            $stmt->close();
+
+            // Realizar eliminación lógica
+            $sql = "UPDATE recursos SET activo = 0 WHERE id = ?";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("i", $id);
+
+            if ($stmt->execute() && $stmt->affected_rows > 0) {
+                $this->response = array(
+                    'status' => 'success',
+                    'message' => 'Recurso eliminado exitosamente',
+                    'data' => array(
+                        'id' => $id,
+                        'titulo' => utf8_encode($recurso['titulo'])
+                    )
+                );
+            } else {
+                $this->response['message'] = 'No se pudo eliminar el recurso';
+            }
+
+            $stmt->close();
+
+        } catch (\Exception $e) {
+            $this->response['message'] = 'Excepción: ' . $e->getMessage();
+            $this->log_error('Error en delete()', ['exception' => $e->getMessage()]);
         }
-        
-        $result->free();
     }
 
-    // OBTENER LA RESPUESTA EN FORMATO JSON
+    /**
+     * Edita/actualiza un recurso existente
+     * 
+     * @param object $jsonOBJ - Objeto con los datos del recurso a actualizar
+     * @return void
+     */
+    public function edit($jsonOBJ) {
+        $this->response = array(
+            'status'  => 'error',
+            'message' => 'Error al actualizar el recurso'
+        );
+
+        try {
+            // Validar que venga el ID
+            if (!isset($jsonOBJ->id) || empty($jsonOBJ->id)) {
+                $this->response['message'] = 'ID del recurso no proporcionado';
+                return;
+            }
+
+            $id = (int)$jsonOBJ->id;
+
+            // Verificar que el recurso existe
+            $sql = "SELECT id FROM recursos WHERE id = ? AND activo = 1";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                $this->response['message'] = 'Recurso no encontrado';
+                $stmt->close();
+                return;
+            }
+            $stmt->close();
+
+            // Verificar si el título ya existe en otro recurso
+            if (isset($jsonOBJ->titulo)) {
+                $sql = "SELECT id FROM recursos WHERE titulo = ? AND id != ? AND activo = 1";
+                $stmt = $this->conexion->prepare($sql);
+                $stmt->bind_param("si", $jsonOBJ->titulo, $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+                    $this->response['message'] = 'Ya existe otro recurso con ese título';
+                    $stmt->close();
+                    return;
+                }
+                $stmt->close();
+            }
+
+            // Construir la consulta de actualización dinámicamente
+            $campos = array();
+            $tipos = '';
+            $valores = array();
+
+            if (isset($jsonOBJ->titulo)) {
+                $campos[] = 'titulo = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->titulo);
+            }
+
+            if (isset($jsonOBJ->descripcion)) {
+                $campos[] = 'descripcion = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->descripcion);
+            }
+
+            if (isset($jsonOBJ->tipo_recurso)) {
+                $campos[] = 'tipo_recurso = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->tipo_recurso);
+            }
+
+            if (isset($jsonOBJ->lenguaje)) {
+                $campos[] = 'lenguaje = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->lenguaje);
+            }
+
+            if (isset($jsonOBJ->archivo_nombre)) {
+                $campos[] = 'archivo_nombre = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->archivo_nombre);
+            }
+
+            if (isset($jsonOBJ->archivo_ruta)) {
+                $campos[] = 'archivo_ruta = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->archivo_ruta);
+            }
+
+            if (isset($jsonOBJ->archivo_tamanio)) {
+                $campos[] = 'archivo_tamanio = ?';
+                $tipos .= 'i';
+                $valores[] = (int)$jsonOBJ->archivo_tamanio;
+            }
+
+            if (isset($jsonOBJ->tags)) {
+                $campos[] = 'tags = ?';
+                $tipos .= 's';
+                $valores[] = $this->escape($jsonOBJ->tags);
+            }
+
+            // Si no hay campos para actualizar
+            if (empty($campos)) {
+                $this->response['message'] = 'No hay campos para actualizar';
+                return;
+            }
+
+            // Agregar el ID al final
+            $tipos .= 'i';
+            $valores[] = $id;
+
+            // Construir y ejecutar la consulta
+            $sql = "UPDATE recursos SET " . implode(', ', $campos) . " WHERE id = ?";
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param($tipos, ...$valores);
+
+            if ($stmt->execute()) {
+                $this->response = array(
+                    'status' => 'success',
+                    'message' => 'Recurso actualizado exitosamente',
+                    'data' => array(
+                        'id' => $id
+                    )
+                );
+            } else {
+                $this->response['message'] = 'Error al actualizar: ' . $stmt->error;
+            }
+
+            $stmt->close();
+
+        } catch (\Exception $e) {
+            $this->response['message'] = 'Excepción: ' . $e->getMessage();
+            $this->log_error('Error en edit()', ['exception' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Retorna los datos en formato JSON
+     * 
+     * @return string - JSON con los datos
+     */
     public function getData() {
-        // SE HACE LA CONVERSIÓN DE ARRAY A JSON
-        return json_encode($this->response, JSON_PRETTY_PRINT);
+        return json_encode($this->response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }
 ?>

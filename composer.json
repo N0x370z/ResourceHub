@@ -11,15 +11,13 @@
     ],
     "autoload": {
         "psr-4": {
-            "ResourceHub\\API\\": "backend/myapi/",
-            "ResourceHub\\API\\Create\\": "backend/myapi/Create/",
-            "ResourceHub\\API\\Read\\": "backend/myapi/Read/",
-            "ResourceHub\\API\\Update\\": "backend/myapi/Update/",
-            "ResourceHub\\API\\Delete\\": "backend/myapi/Delete/"
+            "ResourceHub\\API\\": "backend/myapi/"
         }
     },
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.4",
+        "ext-mysqli": "*",
+        "ext-json": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0"

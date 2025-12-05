@@ -61,21 +61,28 @@ class Read extends DataBase {
      */
     public function search($search) {
         try {
-            $search = $this->escape($search);
+            $searchPattern = "%{$search}%";
             
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
                     FROM recursos r 
                     LEFT JOIN usuarios u ON r.usuario_id = u.id 
                     WHERE r.activo = 1 AND (
-                        r.titulo LIKE '%{$search}%' OR 
-                        r.descripcion LIKE '%{$search}%' OR 
-                        r.tipo_recurso LIKE '%{$search}%' OR 
-                        r.lenguaje LIKE '%{$search}%' OR 
-                        r.tags LIKE '%{$search}%'
+                        r.titulo LIKE ? OR 
+                        r.descripcion LIKE ? OR 
+                        r.tipo_recurso LIKE ? OR 
+                        r.lenguaje LIKE ? OR 
+                        r.tags LIKE ?
                     )
                     ORDER BY r.fecha_subida DESC";
             
-            $result = $this->conexion->query($sql);
+            $stmt = $this->conexion->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("sssss", $searchPattern, $searchPattern, $searchPattern, $searchPattern, $searchPattern);
+                $stmt->execute();
+                $result = $stmt->get_result();
+            } else {
+                $result = false;
+            }
 
             if ($result) {
                 $rows = $result->fetch_all(MYSQLI_ASSOC);
@@ -88,6 +95,10 @@ class Read extends DataBase {
                     }
                 }
                 $result->free();
+            }
+            
+            if (isset($stmt)) {
+                $stmt->close();
             }
 
         } catch (\Exception $e) {
@@ -137,15 +148,20 @@ class Read extends DataBase {
      */
     public function filterByType($tipo) {
         try {
-            $tipo = $this->escape($tipo);
-            
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
                     FROM recursos r 
                     LEFT JOIN usuarios u ON r.usuario_id = u.id 
-                    WHERE r.activo = 1 AND r.tipo_recurso = '{$tipo}'
+                    WHERE r.activo = 1 AND r.tipo_recurso = ?
                     ORDER BY r.fecha_subida DESC";
             
-            $result = $this->conexion->query($sql);
+            $stmt = $this->conexion->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("s", $tipo);
+                $stmt->execute();
+                $result = $stmt->get_result();
+            } else {
+                $result = false;
+            }
 
             if ($result) {
                 $rows = $result->fetch_all(MYSQLI_ASSOC);
@@ -158,6 +174,10 @@ class Read extends DataBase {
                     }
                 }
                 $result->free();
+            }
+            
+            if (isset($stmt)) {
+                $stmt->close();
             }
 
         } catch (\Exception $e) {
@@ -173,15 +193,20 @@ class Read extends DataBase {
      */
     public function filterByLanguage($lenguaje) {
         try {
-            $lenguaje = $this->escape($lenguaje);
-            
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
                     FROM recursos r 
                     LEFT JOIN usuarios u ON r.usuario_id = u.id 
-                    WHERE r.activo = 1 AND r.lenguaje = '{$lenguaje}'
+                    WHERE r.activo = 1 AND r.lenguaje = ?
                     ORDER BY r.fecha_subida DESC";
             
-            $result = $this->conexion->query($sql);
+            $stmt = $this->conexion->prepare($sql);
+            if ($stmt) {
+                $stmt->bind_param("s", $lenguaje);
+                $stmt->execute();
+                $result = $stmt->get_result();
+            } else {
+                $result = false;
+            }
 
             if ($result) {
                 $rows = $result->fetch_all(MYSQLI_ASSOC);
@@ -194,6 +219,10 @@ class Read extends DataBase {
                     }
                 }
                 $result->free();
+            }
+            
+            if (isset($stmt)) {
+                $stmt->close();
             }
 
         } catch (\Exception $e) {

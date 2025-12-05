@@ -1,9 +1,9 @@
 <?php
 /**
- * ResourceHub - Obtener Recurso Individual
- * Endpoint para obtener un recurso específico por ID
+ * ResourceHub - Filtrar Recursos por Tipo
+ * Endpoint para obtener recursos filtrados por tipo
  * Método HTTP: GET
- * Parámetros: id (query string)
+ * Parámetros: type (query string)
  */
 
 require_once __DIR__.'/../vendor/autoload.php';
@@ -21,46 +21,47 @@ header('Access-Control-Allow-Headers: Content-Type');
 verificar_metodo('GET');
 
 try {
-    // Validar parámetro ID
-    if (!isset($_GET['id']) || empty($_GET['id'])) {
+    // Validar parámetro de tipo
+    if (!isset($_GET['type']) || empty(trim($_GET['type']))) {
         json_response([
             'status' => 'error',
-            'message' => 'ID del recurso requerido'
+            'message' => 'Parámetro de tipo requerido'
         ], 400);
     }
     
-    $recurso_id = (int)$_GET['id'];
+    $tipo = trim($_GET['type']);
     
-    if ($recurso_id <= 0) {
+    // Validar tipo de recurso
+    $tipos_validos = ['codigo', 'documentacion', 'biblioteca', 'herramienta', 'tutorial', 'otro'];
+    if (!in_array($tipo, $tipos_validos)) {
         json_response([
             'status' => 'error',
-            'message' => 'ID inválido'
+            'message' => 'Tipo de recurso inválido. Valores permitidos: ' . implode(', ', $tipos_validos)
         ], 400);
     }
     
-    // Obtener el recurso
     $resource = new Read('resourcehub');
-    $resource->single($recurso_id);
+    $resource->filterByType($tipo);
     
     $data = json_decode($resource->getData(), true);
     
-    // Verificar si se encontró el recurso
+    // Si no hay datos, retornar array vacío
     if (empty($data)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'Recurso no encontrado'
-        ], 404);
+        $data = [];
     }
     
     json_response([
         'status' => 'success',
-        'data' => $data
+        'data' => $data,
+        'count' => count($data),
+        'filter' => ['type' => $tipo]
     ], 200);
     
 } catch (Exception $e) {
     json_response([
         'status' => 'error',
-        'message' => 'Error al obtener recurso: ' . $e->getMessage()
+        'message' => 'Error al filtrar recursos: ' . $e->getMessage()
     ], 500);
 }
 ?>
+

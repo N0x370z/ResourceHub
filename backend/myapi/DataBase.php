@@ -71,14 +71,34 @@ abstract class DataBase {
         $stmt = $this->conexion->prepare($sql);
         
         if (!$stmt) {
+            $this->log_error('Error al preparar consulta', [
+                'sql' => $sql,
+                'error' => $this->conexion->error
+            ]);
             return false;
         }
         
         if (!empty($types) && !empty($params)) {
+            if (strlen($types) !== count($params)) {
+                $this->log_error('Error: tipos y parámetros no coinciden', [
+                    'types' => $types,
+                    'params_count' => count($params)
+                ]);
+                $stmt->close();
+                return false;
+            }
             $stmt->bind_param($types, ...$params);
         }
         
-        $stmt->execute();
+        if (!$stmt->execute()) {
+            $this->log_error('Error al ejecutar consulta', [
+                'sql' => $sql,
+                'error' => $stmt->error
+            ]);
+            $stmt->close();
+            return false;
+        }
+        
         return $stmt;
     }
 

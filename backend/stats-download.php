@@ -1,7 +1,20 @@
 <?php
+/**
+ * ResourceHub - Estadísticas de Descargas
+ * Endpoint para obtener estadísticas detalladas de descargas
+ * Método HTTP: GET
+ */
+
 require_once __DIR__.'/database.php';
 
+// Configurar headers
 header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// Verificar método HTTP
+verificar_metodo('GET');
 
 $response = array();
 
@@ -93,22 +106,72 @@ try {
         $result->free();
     }
     
+    // Obtener recursos más descargados
+    $sql = "SELECT r.id, r.titulo, r.tipo_recurso, r.lenguaje, COUNT(bd.id) as total_descargas
+            FROM recursos r
+            LEFT JOIN bitacora_descargas bd ON r.id = bd.recurso_id
+            WHERE r.activo = 1
+            GROUP BY r.id
+            ORDER BY total_descargas DESC
+            LIMIT 10";
+    $result = $conexion->query($sql);
+    
+    $mas_descargados = array();
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $mas_descargados[] = array(
+                'id' => (int)$row['id'],
+                'titulo' => $row['titulo'],
+                'tipo_recurso' => $row['tipo_recurso'],
+                'lenguaje' => $row['lenguaje'],
+                'total_descargas' => (int)$row['total_descargas']
+            );
+        }
+        $result->free();
+    }
+    
+    // Obtener descargas por usuario (si hay usuarios autenticados)
+    $sql = "SELECT u.id, u.nombre, u.email, COUNT(bd.id) as total_descargas
+            FROM usuarios u
+            LEFT JOIN bitacora_descargas bd ON u.id = bd.usuario_id
+            WHERE bd.usuario_id IS NOT NULL
+            GROUP BY u.id
+            ORDER BY total_descargas DESC
+            LIMIT 10";
+    $result = $conexion->query($sql);
+    
+    $por_usuario = array();
+    if ($result) {
+        while ($row = $result->fetch_assoc()) {
+            $por_usuario[] = array(
+                'usuario_id' => (int)$row['id'],
+                'nombre' => $row['nombre'],
+                'email' => $row['email'],
+                'total_descargas' => (int)$row['total_descargas']
+            );
+        }
+        $result->free();
+    }
+    
     $response = array(
         'status' => 'success',
         'total_descargas' => $total_descargas,
         'por_tipo' => $por_tipo,
         'por_lenguaje' => $por_lenguaje,
         'por_dia' => $por_dia,
-        'por_hora' => $por_hora
+        'por_hora' => $por_hora,
+        'mas_descargados' => $mas_descargados,
+        'por_usuario' => $por_usuario
     );
     
+    json_response($response, 200);
+    
 } catch (Exception $e) {
-    $response = array(
+    json_response([
         'status' => 'error',
         'message' => 'Error al obtener estadísticas: ' . $e->getMessage()
-    );
+    ], 500);
 }
 
-echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 $conexion->close();
 ?>

@@ -34,29 +34,43 @@ $(document).ready(function() {
         $.ajax({
             url: 'backend/resource-list.php',
             type: 'GET',
-            success: function(recursos) {
-                todosLosRecursos = recursos;
-                mostrarRecursos(recursos);
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    todosLosRecursos = response.data;
+                    mostrarRecursos(response.data);
+                } else {
+                    mostrarError('No se pudieron cargar los recursos');
+                }
             },
-            error: function() {
-                $('#resources-container').html(`
-                    <div class="col-12 no-resources">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h4>Error al cargar los recursos</h4>
-                        <p>Por favor, intenta nuevamente más tarde</p>
-                    </div>
-                `);
+            error: function(xhr, status, error) {
+                console.error('Error al cargar recursos:', error);
+                mostrarError('Error al cargar los recursos. Por favor, intenta nuevamente más tarde');
             }
         });
     }
 
     function buscarRecursos(termino) {
+        if (termino.length < 2) {
+            mostrarError('El término de búsqueda debe tener al menos 2 caracteres');
+            return;
+        }
+        
         $.ajax({
             url: 'backend/resource-search.php',
             type: 'GET',
+            dataType: 'json',
             data: { search: termino },
-            success: function(recursos) {
-                mostrarRecursos(recursos);
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    mostrarRecursos(response.data);
+                } else {
+                    mostrarError(response.message || 'No se encontraron recursos');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al buscar recursos:', error);
+                mostrarError('Error al realizar la búsqueda. Por favor, intenta nuevamente');
             }
         });
     }
@@ -129,10 +143,18 @@ $(document).ready(function() {
         $.ajax({
             url: 'backend/resource-stats.php',
             type: 'GET',
-            success: function(stats) {
-                $('#stat-total').text(stats.total_recursos || 0);
-                $('#stat-tipos').text(Object.keys(stats.por_tipo || {}).length);
-                $('#stat-lenguajes').text(Object.keys(stats.por_lenguaje || {}).length);
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.data) {
+                    const stats = response.data;
+                    $('#stat-total').text(stats.total_recursos || 0);
+                    $('#stat-tipos').text(Object.keys(stats.por_tipo || {}).length);
+                    $('#stat-lenguajes').text(Object.keys(stats.por_lenguaje || {}).length);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al cargar estadísticas:', error);
+                // No mostrar error al usuario, solo dejar valores por defecto
             }
         });
     }
@@ -166,8 +188,45 @@ $(document).ready(function() {
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
 
+    // Función para mostrar errores
+    function mostrarError(mensaje) {
+        $('#resources-container').html(`
+            <div class="col-12 no-resources">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>${mensaje}</h4>
+            </div>
+        `);
+    }
+
     // Hacer global la función de descarga
     window.descargarRecurso = function(id) {
-        window.location.href = `backend/resource-download.php?id=${id}`;
+        if (!id) {
+            console.error('ID de recurso no válido');
+            return;
+        }
+        
+        // Registrar descarga y luego descargar el archivo
+        $.ajax({
+            url: `backend/resource-download.php?id=${id}`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success' && response.data && response.data.archivo_ruta) {
+                    // Crear un enlace temporal para descargar el archivo
+                    const link = document.createElement('a');
+                    link.href = response.data.archivo_ruta;
+                    link.download = response.data.archivo_nombre || 'recurso';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert('Error al descargar el recurso: ' + (response.message || 'Error desconocido'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al descargar recurso:', error);
+                alert('Error al descargar el recurso. Por favor, intenta nuevamente.');
+            }
+        });
     };
 });
