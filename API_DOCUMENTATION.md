@@ -390,3 +390,6 @@ $data = json_decode($response, true);
 - Se validan todos los datos de entrada
 - Se verifica la propiedad de recursos antes de editar/eliminar
 
+
+
+
