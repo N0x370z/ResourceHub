@@ -1,44 +1,66 @@
-# ResourceHub - Configuración Apache
-# .htaccess para seguridad y configuración del servidor
+# ResourceHub - Apache Configuration
+# Configuración para el proyecto ResourceHub
 
-# Habilitar reescritura de URLs
+# Habilitar rewrite engine
 RewriteEngine On
 
-# Redirigir al login si se intenta acceder al dashboard sin autenticación
-# (Esto se maneja mejor en JavaScript, pero es una capa adicional)
+# Página de inicio por defecto
+DirectoryIndex index.html
 
-# Prevenir acceso directo a archivos sensibles
-<FilesMatch "(composer\.json|composer\.lock|README\.md)$">
-    Order Allow,Deny
+# Redirigir a HTTPS (si está disponible)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Permitir CORS para desarrollo
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Manejar peticiones OPTIONS para CORS
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Proteger archivos sensibles
+<FilesMatch "\.(env|json|log|sql)$">
+    Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Proteger directorio vendor
-<IfModule mod_rewrite.c>
-    RewriteRule ^vendor/.*$ - [F,L]
-</IfModule>
+# Proteger composer
+<FilesMatch "^composer\.(json|lock)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
 
-# Configuración de seguridad para headers
-<IfModule mod_headers.c>
-    # Prevenir XSS
-    Header set X-XSS-Protection "1; mode=block"
-    
-    # Prevenir clickjacking
-    Header set X-Frame-Options "SAMEORIGIN"
-    
-    # Prevenir MIME sniffing
-    Header set X-Content-Type-Options "nosniff"
-    
-    # Política de referrer
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-</IfModule>
+# Proteger archivos de configuración
+<FilesMatch "^(config|database)\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
 
-# Habilitar compresión
+# Permitir acceso a archivos en uploads
+<Directory "uploads">
+    Options -Indexes
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+</Directory>
+
+# Configuración de PHP
+php_flag display_errors Off
+php_flag log_errors On
+php_value error_log logs/php_error.log
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value memory_limit 128M
+
+# Comprimir archivos para mejor rendimiento
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
 </IfModule>
 
-# Caché del navegador
+# Cache de archivos estáticos
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/jpg "access plus 1 year"
@@ -47,18 +69,25 @@ RewriteEngine On
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/x-javascript "access plus 1 month"
 </IfModule>
 
-# Página de error personalizada
-ErrorDocument 404 /index.html
-
-# Deshabilitar listado de directorios
+# Prevenir directory listing
 Options -Indexes
 
-# Configuración PHP (si es posible modificar)
-<IfModule mod_php7.c>
-    php_value upload_max_filesize 10M
-    php_value post_max_size 10M
-    php_value max_execution_time 300
-    php_value max_input_time 300
+# Seguir enlaces simbólicos
+Options +FollowSymLinks
+
+# Seguridad adicional
+ServerSignature Off
+
+# Proteger contra ataques XSS
+<IfModule mod_headers.c>
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
 </IfModule>
+
+# Error pages personalizadas (opcional)
+# ErrorDocument 404 /error-404.html
+# ErrorDocument 500 /error-500.html

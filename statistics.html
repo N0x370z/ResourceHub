@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas - ResourceHub</title>
+    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        #sidebar {
+            min-width: 280px;
+            max-width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 25px;
+            background: rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #sidebar ul li a {
+            padding: 15px 25px;
+            display: block;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+
+        #sidebar ul li a:hover,
+        #sidebar ul li.active > a {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fff;
+        }
+
+        #sidebar ul li a i {
+            margin-right: 12px;
+            width: 20px;
+        }
+
+        #content {
+            width: 100%;
+            padding: 0;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-container h5 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+        }
+
+        .chart-container h5 i {
+            margin-right: 10px;
+            color: #667eea;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stats-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .stats-card.blue .icon { color: #667eea; }
+        .stats-card.green .icon { color: #11998e; }
+        .stats-card.orange .icon { color: #fa709a; }
+        .stats-card.purple .icon { color: #764ba2; }
+        .stats-card.red .icon { color: #ee5a6f; }
+        .stats-card.yellow .icon { color: #feca57; }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stats-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .top-resources-table {
+            width: 100%;
+        }
+
+        .top-resources-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .top-resources-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .badge-custom {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
+                <h3>ResourceHub</h3>
+            </div>
+
+            <ul class="components list-unstyled">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="resources.html">
+                        <i class="fas fa-folder"></i>
+                        Recursos
+                    </a>
+                </li>
+                <li>
+                    <a href="add-resource.html">
+                        <i class="fas fa-plus-circle"></i>
+                        Agregar Recurso
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="statistics.html">
+                        <i class="fas fa-chart-bar"></i>
+                        Estadísticas
+                    </a>
+                </li>
+                <li>
+                    <a href="catalog.html">
+                        <i class="fas fa-eye"></i>
+                        Ver Catálogo Público
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <div id="content">
+            <nav class="navbar">
+                <h4 class="mb-0"><i class="fas fa-chart-bar"></i> Estadísticas Completas</h4>
+            </nav>
+
+            <div class="container-fluid px-4">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <h2><i class="fas fa-chart-pie"></i> Análisis de Datos</h2>
+                    <p class="mb-0">Visualización completa de estadísticas de recursos y descargas</p>
+                </div>
+
+                <!-- Stats Cards Row 1 -->
+                <div class="row">
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="stats-card blue">
+                            <div class="icon"><i class="fas fa-folder"></i></div>
+                            <div class="stats-number" id="stat-total">0</div>
+                            <div class="stats-label">Total Recursos</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="stats-card green">
+                            <div class="icon"><i class="fas fa-download"></i></div>
+                            <div class="stats-number" id="stat-downloads">0</div>
+                            <div class="stats-label">Descargas</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="stats-card orange">
+                            <div class="icon"><i class="fas fa-code"></i></div>
+                            <div class="stats-number" id="stat-languages">0</div>
+                            <div class="stats-label">Lenguajes</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="stats-card purple">
+                            <div class="icon"><i class="fas fa-layer-group"></i></div>
+                            <div class="stats-number" id="stat-types">0</div>
+                            <div class="stats-label">Tipos</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="stats-card red">
+                            <div class="icon"><i class="fas fa-fire"></i></div>
+                            <div class="stats-number" id="stat-popular">0</div>
+                            <div class="stats-label">Más Popular</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6">
+                        <div class="stats-card yellow">
+                            <div class="icon"><i class="fas fa-clock"></i></div>
+                            <div class="stats-number" id="stat-today">0</div>
+                            <div class="stats-label">Hoy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1: Recursos -->
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-chart-pie"></i> Distribución por Tipo de Recurso</h5>
+                            <canvas id="chartByType"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-chart-bar"></i> Recursos por Lenguaje</h5>
+                            <canvas id="chartByLanguage"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2: Descargas -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-calendar-week"></i> Descargas por Día de la Semana</h5>
+                            <canvas id="chartByDay"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 3: Hora del día (BONUS +10 pts) -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-clock"></i> Descargas por Hora del Día</h5>
+                            <canvas id="chartByHour"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 4: Descargas por tipo y lenguaje -->
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-download"></i> Descargas por Tipo de Recurso</h5>
+                            <canvas id="chartDownloadsByType"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-code"></i> Descargas por Lenguaje</h5>
+                            <canvas id="chartDownloadsByLanguage"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top 10 Recursos más descargados -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="chart-container">
+                            <h5><i class="fas fa-trophy"></i> Top 10 Recursos Más Descargados</h5>
+                            <div class="table-responsive">
+                                <table class="top-resources-table" id="top-resources-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Título</th>
+                                            <th>Tipo</th>
+                                            <th>Lenguaje</th>
+                                            <th>Descargas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="top-resources-body">
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">
+                                                Cargando datos...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Logout
+            $('#btn-logout').on('click', function(e) {
+                e.preventDefault();
+                $.post('backend/auth-logout.php', function() {
+                    window.location.href = 'login.html';
+                });
+            });
+
+            // Cargar todas las estadísticas
+            cargarEstadisticas();
+
+            function cargarEstadisticas() {
+                // Cargar estadísticas de recursos
+                $.ajax({
+                    url: 'backend/resource-stats.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success' && response.data) {
+                            mostrarEstadisticasRecursos(response.data);
+                        }
+                    }
+                });
+
+                // Cargar estadísticas de descargas
+                $.ajax({
+                    url: 'backend/stats-download.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            mostrarEstadisticasDescargas(response);
+                        }
+                    }
+                });
+            }
+
+            function mostrarEstadisticasRecursos(stats) {
+                $('#stat-total').text(stats.total_recursos || 0);
+                $('#stat-types').text(Object.keys(stats.por_tipo || {}).length);
+                $('#stat-languages').text(Object.keys(stats.por_lenguaje || {}).length);
+
+                // Gráfico por tipo
+                crearGraficoTipo(stats.por_tipo || {});
+                
+                // Gráfico por lenguaje
+                crearGraficoLenguaje(stats.por_lenguaje || {});
+            }
+
+            function mostrarEstadisticasDescargas(data) {
+                $('#stat-downloads').text(data.total_descargas || 0);
+
+                // Encontrar el recurso más popular
+                if (data.mas_descargados && data.mas_descargados.length > 0) {
+                    $('#stat-popular').text(data.mas_descargados[0].total_descargas || 0);
+                }
+
+                // Gráfico por día
+                crearGraficoDia(data.por_dia || {});
+                
+                // Gráfico por hora (BONUS)
+                crearGraficoHora(data.por_hora || []);
+                
+                // Descargas por tipo
+                crearGraficoDescargasTipo(data.por_tipo || {});
+                
+                // Descargas por lenguaje
+                crearGraficoDescargasLenguaje(data.por_lenguaje || {});
+
+                // Tabla de top recursos
+                mostrarTopRecursos(data.mas_descargados || []);
+            }
+
+            function crearGraficoTipo(data) {
+                const ctx = document.getElementById('chartByType').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(data).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                        datasets: [{
+                            data: Object.values(data),
+                            backgroundColor: [
+                                '#667eea', '#11998e', '#fa709a', 
+                                '#feca57', '#ee5a6f', '#95a5a6'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+
+            function crearGraficoLenguaje(data) {
+                const ctx = document.getElementById('chartByLanguage').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data),
+                        datasets: [{
+                            label: 'Recursos',
+                            data: Object.values(data),
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function crearGraficoDia(data) {
+                const ctx = document.getElementById('chartByDay').getContext('2d');
+                const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+                const valores = dias.map(dia => data[dia] || 0);
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: dias,
+                        datasets: [{
+                            label: 'Descargas',
+                            data: valores,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function crearGraficoHora(data) {
+                const ctx = document.getElementById('chartByHour').getContext('2d');
+                const horas = Array.from({length: 24}, (_, i) => i + ':00');
+                const valores = Array.isArray(data) ? data : Array(24).fill(0);
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: horas,
+                        datasets: [{
+                            label: 'Descargas',
+                            data: valores,
+                            backgroundColor: '#11998e'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function crearGraficoDescargasTipo(data) {
+                const ctx = document.getElementById('chartDownloadsByType').getContext('2d');
+                new Chart(ctx, {
+                    type: 'polarArea',
+                    data: {
+                        labels: Object.keys(data).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                        datasets: [{
+                            data: Object.values(data),
+                            backgroundColor: [
+                                'rgba(102, 126, 234, 0.7)',
+                                'rgba(17, 153, 142, 0.7)',
+                                'rgba(250, 112, 154, 0.7)',
+                                'rgba(254, 202, 87, 0.7)',
+                                'rgba(238, 90, 111, 0.7)',
+                                'rgba(149, 165, 166, 0.7)'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            function crearGraficoDescargasLenguaje(data) {
+                const ctx = document.getElementById('chartDownloadsByLanguage').getContext('2d');
+                new Chart(ctx, {
+                    type: 'horizontalBar',
+                    data: {
+                        labels: Object.keys(data),
+                        datasets: [{
+                            label: 'Descargas',
+                            data: Object.values(data),
+                            backgroundColor: '#fa709a'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function mostrarTopRecursos(recursos) {
+                const tbody = $('#top-resources-body');
+                
+                if (!recursos || recursos.length === 0) {
+                    tbody.html(`
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">
+                                No hay datos disponibles
+                            </td>
+                        </tr>
+                    `);
+                    return;
+                }
+
+                let html = '';
+                recursos.slice(0, 10).forEach((recurso, index) => {
+                    html += `
+                        <tr>
+                            <td><strong>${index + 1}</strong></td>
+                            <td>${recurso.titulo || 'Sin título'}</td>
+                            <td>
+                                <span class="badge badge-primary badge-custom">
+                                    ${recurso.tipo_recurso || 'N/A'}
+                                </span>
+                            </td>
+                            <td>
+                                ${recurso.lenguaje ? 
+                                    `<span class="badge badge-secondary badge-custom">${recurso.lenguaje}</span>` : 
+                                    '<span class="text-muted">-</span>'
+                                }
+                            </td>
+                            <td>
+                                <strong class="text-success">
+                                    ${recurso.total_descargas || 0}
+                                    <i class="fas fa-download"></i>
+                                </strong>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                tbody.html(html);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -70,7 +70,24 @@ try {
     // Obtener información del archivo
     $nombre_original = $file['name'];
     $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
-    $mime_type = mime_content_type($file['tmp_name']);
+    
+    // Validar que la extensión no esté vacía
+    if (empty($extension)) {
+        json_response([
+            'status' => 'error',
+            'message' => 'El archivo no tiene una extensión válida'
+        ], 400);
+    }
+    
+    // Obtener MIME type de forma segura
+    $mime_type = null;
+    if (function_exists('mime_content_type')) {
+        $mime_type = mime_content_type($file['tmp_name']);
+    } elseif (function_exists('finfo_open')) {
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+    }
 
     // Lista de extensiones permitidas
     $extensiones_permitidas = [

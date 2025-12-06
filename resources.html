@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Recursos - ResourceHub</title>
+    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        #sidebar {
+            min-width: 280px;
+            max-width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 25px;
+            background: rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #sidebar ul li a {
+            padding: 15px 25px;
+            display: block;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+
+        #sidebar ul li a:hover,
+        #sidebar ul li.active > a {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fff;
+        }
+
+        #sidebar ul li a i {
+            margin-right: 12px;
+            width: 20px;
+        }
+
+        #content {
+            width: 100%;
+            padding: 0;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            margin-bottom: 30px;
+        }
+
+        .resources-header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .resource-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .badge-custom {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .btn-action {
+            margin: 0 5px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
+                <h3>ResourceHub</h3>
+            </div>
+
+            <ul class="components list-unstyled">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="resources.html">
+                        <i class="fas fa-folder"></i>
+                        Recursos
+                    </a>
+                </li>
+                <li>
+                    <a href="add-resource.html">
+                        <i class="fas fa-plus-circle"></i>
+                        Agregar Recurso
+                    </a>
+                </li>
+                <li>
+                    <a href="statistics.html">
+                        <i class="fas fa-chart-bar"></i>
+                        Estadísticas
+                    </a>
+                </li>
+                <li>
+                    <a href="catalog.html">
+                        <i class="fas fa-eye"></i>
+                        Ver Catálogo Público
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <div id="content">
+            <nav class="navbar">
+                <h4 class="mb-0"><i class="fas fa-folder"></i> Gestión de Recursos</h4>
+            </nav>
+
+            <div class="container-fluid px-4">
+                <!-- Header con búsqueda -->
+                <div class="resources-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h2><i class="fas fa-folder-open"></i> Mis Recursos</h2>
+                            <p class="text-muted mb-0">Administra tu biblioteca de recursos</p>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <a href="add-resource.html" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Agregar Nuevo Recurso
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="input-group search-box">
+                                <input type="text" class="form-control" id="search-input" 
+                                       placeholder="Buscar recursos...">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" id="btn-search">
+                                        <i class="fas fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-control" id="filter-type">
+                                <option value="">Todos los tipos</option>
+                                <option value="codigo">Código</option>
+                                <option value="documentacion">Documentación</option>
+                                <option value="biblioteca">Biblioteca</option>
+                                <option value="herramienta">Herramienta</option>
+                                <option value="tutorial">Tutorial</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de recursos -->
+                <div id="resources-container" class="row">
+                    <!-- Los recursos se cargarán aquí dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar recurso -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit"></i> Editar Recurso
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-form">
+                        <input type="hidden" id="edit-id">
+                        
+                        <div class="form-group">
+                            <label>Título</label>
+                            <input type="text" class="form-control" id="edit-titulo" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea class="form-control" id="edit-descripcion" rows="3"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tipo de Recurso</label>
+                                    <select class="form-control" id="edit-tipo" required>
+                                        <option value="codigo">Código</option>
+                                        <option value="documentacion">Documentación</option>
+                                        <option value="biblioteca">Biblioteca</option>
+                                        <option value="herramienta">Herramienta</option>
+                                        <option value="tutorial">Tutorial</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Lenguaje</label>
+                                    <input type="text" class="form-control" id="edit-lenguaje">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tags (separados por coma)</label>
+                            <input type="text" class="form-control" id="edit-tags">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-save-edit">
+                        <i class="fas fa-save"></i> Guardar Cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let todosLosRecursos = [];
+
+            // Cargar recursos
+            cargarRecursos();
+
+            // Logout
+            $('#btn-logout').on('click', function(e) {
+                e.preventDefault();
+                $.post('backend/auth-logout.php', function() {
+                    window.location.href = 'login.html';
+                });
+            });
+
+            // Búsqueda
+            $('#btn-search, #search-input').on('click keypress', function(e) {
+                if (e.type === 'click' || e.which === 13) {
+                    const termino = $('#search-input').val().trim();
+                    if (termino) {
+                        buscarRecursos(termino);
+                    } else {
+                        cargarRecursos();
+                    }
+                }
+            });
+
+            // Filtro por tipo
+            $('#filter-type').on('change', function() {
+                const tipo = $(this).val();
+                if (tipo) {
+                    filtrarPorTipo(tipo);
+                } else {
+                    cargarRecursos();
+                }
+            });
+
+            function cargarRecursos() {
+                $.ajax({
+                    url: 'backend/resource-list.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            todosLosRecursos = response.data || [];
+                            mostrarRecursos(todosLosRecursos);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        mostrarError();
+                    }
+                });
+            }
+
+            function buscarRecursos(termino) {
+                $.ajax({
+                    url: `backend/resource-search.php?search=${encodeURIComponent(termino)}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            mostrarRecursos(response.data || []);
+                        }
+                    }
+                });
+            }
+
+            function filtrarPorTipo(tipo) {
+                $.ajax({
+                    url: `backend/resource-filter-type.php?type=${tipo}`,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            mostrarRecursos(response.data || []);
+                        }
+                    }
+                });
+            }
+
+            function mostrarRecursos(recursos) {
+                const container = $('#resources-container');
+                
+                if (!recursos || recursos.length === 0) {
+                    container.html(`
+                        <div class="col-12 empty-state">
+                            <i class="fas fa-folder-open"></i>
+                            <h4>No hay recursos</h4>
+                            <p>Comienza agregando tu primer recurso</p>
+                            <a href="add-resource.html" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Agregar Recurso
+                            </a>
+                        </div>
+                    `);
+                    return;
+                }
+
+                let html = '';
+                recursos.forEach(recurso => {
+                    const icono = obtenerIcono(recurso.tipo_recurso);
+                    
+                    html += `
+                        <div class="col-md-6 col-lg-4">
+                            <div class="resource-card">
+                                <div class="resource-icon">
+                                    <i class="${icono}"></i>
+                                </div>
+                                <h5>${recurso.titulo}</h5>
+                                <p class="text-muted">${recurso.descripcion || 'Sin descripción'}</p>
+                                
+                                <div class="mb-3">
+                                    <span class="badge badge-primary badge-custom">
+                                        ${recurso.tipo_recurso}
+                                    </span>
+                                    ${recurso.lenguaje ? `
+                                        <span class="badge badge-secondary badge-custom">
+                                            ${recurso.lenguaje}
+                                        </span>
+                                    ` : ''}
+                                </div>
+
+                                <div class="text-muted small mb-3">
+                                    <i class="fas fa-calendar"></i> ${formatearFecha(recurso.fecha_subida)}
+                                </div>
+
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-info btn-action" onclick="editarRecurso(${recurso.id})">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button class="btn btn-danger btn-action" onclick="eliminarRecurso(${recurso.id}, '${recurso.titulo}')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.html(html);
+            }
+
+            // Funciones globales
+            window.editarRecurso = function(id) {
+                const recurso = todosLosRecursos.find(r => r.id == id);
+                if (!recurso) return;
+
+                $('#edit-id').val(recurso.id);
+                $('#edit-titulo').val(recurso.titulo);
+                $('#edit-descripcion').val(recurso.descripcion);
+                $('#edit-tipo').val(recurso.tipo_recurso);
+                $('#edit-lenguaje').val(recurso.lenguaje);
+                $('#edit-tags').val(recurso.tags);
+
+                $('#editModal').modal('show');
+            };
+
+            window.eliminarRecurso = function(id, titulo) {
+                if (confirm(`¿Estás seguro de eliminar "${titulo}"?`)) {
+                    $.ajax({
+                        url: `backend/resource-delete.php?id=${id}`,
+                        type: 'DELETE',
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                alert('Recurso eliminado exitosamente');
+                                cargarRecursos();
+                            } else {
+                                alert('Error: ' + response.message);
+                            }
+                        },
+                        error: function() {
+                            alert('Error al eliminar el recurso');
+                        }
+                    });
+                }
+            };
+
+            // Guardar edición
+            $('#btn-save-edit').on('click', function() {
+                const datos = {
+                    id: parseInt($('#edit-id').val()),
+                    titulo: $('#edit-titulo').val(),
+                    descripcion: $('#edit-descripcion').val(),
+                    tipo_recurso: $('#edit-tipo').val(),
+                    lenguaje: $('#edit-lenguaje').val(),
+                    tags: $('#edit-tags').val()
+                };
+
+                $.ajax({
+                    url: 'backend/resource-edit.php',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(datos),
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            alert('Recurso actualizado exitosamente');
+                            $('#editModal').modal('hide');
+                            cargarRecursos();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Error al actualizar el recurso');
+                    }
+                });
+            });
+
+            function obtenerIcono(tipo) {
+                const iconos = {
+                    'codigo': 'fas fa-code',
+                    'documentacion': 'fas fa-book',
+                    'biblioteca': 'fas fa-box',
+                    'herramienta': 'fas fa-tools',
+                    'tutorial': 'fas fa-graduation-cap',
+                    'otro': 'fas fa-file'
+                };
+                return iconos[tipo] || 'fas fa-file';
+            }
+
+            function formatearFecha(fecha) {
+                const date = new Date(fecha);
+                return date.toLocaleDateString('es-ES', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            }
+
+            function mostrarError() {
+                $('#resources-container').html(`
+                    <div class="col-12 empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h4>Error al cargar recursos</h4>
+                        <p>Por favor, intenta nuevamente</p>
+                    </div>
+                `);
+            }
+        });
+    </script>
+</body>
+</html>
