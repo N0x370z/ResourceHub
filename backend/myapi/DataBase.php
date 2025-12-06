@@ -22,7 +22,7 @@ abstract class DataBase {
     public function __construct(
         $db = 'resourcehub', 
         $user = 'root', 
-        $pass = 'JoshelinLun407', 
+        $pass = '', 
         $host = 'localhost'
     ) {
         // Crear conexión
