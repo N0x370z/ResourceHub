@@ -1,8 +1,7 @@
 <?php
 /**
  * ResourceHub - Clase Read
- * 
- * Maneja la lectura de recursos desde la base de datos
+ * * Maneja la lectura de recursos desde la base de datos
  */
 
 namespace ResourceHub\API\Read;
@@ -13,15 +12,23 @@ require_once __DIR__ . '/../DataBase.php';
 class Read extends DataBase {
     private $response;
 
-    public function __construct($db = 'resourcehub', $user = 'root', $pass = 'JoshelinLun407') {
+    public function __construct($db = 'resourcehub', $user = 'root', $pass = '') {
         $this->response = array();
         parent::__construct($db, $user, $pass);
     }
 
     /**
+     * Función auxiliar para reemplazar utf8_encode (obsoleto en PHP 8.2)
+     */
+    private function encode_utf8($string) {
+        if ($string === null) return null;
+        // Convierte de ISO-8859-1 a UTF-8 (mismo comportamiento que tenía utf8_encode)
+        return mb_convert_encoding($string, 'UTF-8', 'ISO-8859-1');
+    }
+
+    /**
      * Lista todos los recursos activos
-     * 
-     * @return void
+     * * @return void
      */
     public function list() {
         try {
@@ -39,7 +46,8 @@ class Read extends DataBase {
                 if (!empty($rows)) {
                     foreach ($rows as $num => $row) {
                         foreach ($row as $key => $value) {
-                            $this->response[$num][$key] = utf8_encode($value);
+                            // Corrección: Usar mb_convert_encoding en lugar de utf8_encode
+                            $this->response[$num][$key] = $this->encode_utf8($value);
                         }
                     }
                 }
@@ -55,8 +63,7 @@ class Read extends DataBase {
 
     /**
      * Busca recursos por término de búsqueda
-     * 
-     * @param string $search - Término de búsqueda
+     * * @param string $search - Término de búsqueda
      * @return void
      */
     public function search($search) {
@@ -90,7 +97,8 @@ class Read extends DataBase {
                 if (!empty($rows)) {
                     foreach ($rows as $num => $row) {
                         foreach ($row as $key => $value) {
-                            $this->response[$num][$key] = utf8_encode($value);
+                            // Corrección PHP 8.2
+                            $this->response[$num][$key] = $this->encode_utf8($value);
                         }
                     }
                 }
@@ -108,8 +116,7 @@ class Read extends DataBase {
 
     /**
      * Obtiene un recurso específico por ID
-     * 
-     * @param int $id - ID del recurso
+     * * @param int $id - ID del recurso
      * @return void
      */
     public function single($id) {
@@ -129,7 +136,8 @@ class Read extends DataBase {
                 
                 if ($row) {
                     foreach ($row as $key => $value) {
-                        $this->response[$key] = utf8_encode($value);
+                        // Corrección PHP 8.2
+                        $this->response[$key] = $this->encode_utf8($value);
                     }
                 }
                 $stmt->close();
@@ -142,8 +150,7 @@ class Read extends DataBase {
 
     /**
      * Filtra recursos por tipo
-     * 
-     * @param string $tipo - Tipo de recurso
+     * * @param string $tipo - Tipo de recurso
      * @return void
      */
     public function filterByType($tipo) {
@@ -169,7 +176,8 @@ class Read extends DataBase {
                 if (!empty($rows)) {
                     foreach ($rows as $num => $row) {
                         foreach ($row as $key => $value) {
-                            $this->response[$num][$key] = utf8_encode($value);
+                            // Corrección PHP 8.2
+                            $this->response[$num][$key] = $this->encode_utf8($value);
                         }
                     }
                 }
@@ -187,8 +195,7 @@ class Read extends DataBase {
 
     /**
      * Filtra recursos por lenguaje
-     * 
-     * @param string $lenguaje - Lenguaje de programación
+     * * @param string $lenguaje - Lenguaje de programación
      * @return void
      */
     public function filterByLanguage($lenguaje) {
@@ -214,7 +221,8 @@ class Read extends DataBase {
                 if (!empty($rows)) {
                     foreach ($rows as $num => $row) {
                         foreach ($row as $key => $value) {
-                            $this->response[$num][$key] = utf8_encode($value);
+                            // Corrección PHP 8.2
+                            $this->response[$num][$key] = $this->encode_utf8($value);
                         }
                     }
                 }
@@ -232,8 +240,7 @@ class Read extends DataBase {
 
     /**
      * Obtiene estadísticas generales de recursos
-     * 
-     * @return void
+     * * @return void
      */
     public function getStats() {
         try {
@@ -287,8 +294,7 @@ class Read extends DataBase {
 
     /**
      * Retorna los datos en formato JSON
-     * 
-     * @return string - JSON con los datos
+     * * @return string - JSON con los datos
      */
     public function getData() {
         return json_encode($this->response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

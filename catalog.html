@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Público - ResourceHub</title>
+    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        /* Sidebar Styles (Idéntico a los otros archivos) */
+        #sidebar {
+            min-width: 280px;
+            max-width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 25px;
+            background: rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #sidebar ul li a {
+            padding: 15px 25px;
+            display: block;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+
+        #sidebar ul li a:hover,
+        #sidebar ul li.active > a {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fff;
+        }
+
+        #sidebar ul li a i {
+            margin-right: 12px;
+            width: 20px;
+        }
+
+        #content {
+            width: 100%;
+            padding: 0;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Catalog Specific Styles */
+        .catalog-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .search-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 15px;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-box-lg {
+            max-width: 700px;
+            margin: 20px auto 0;
+            position: relative;
+        }
+
+        .search-box-lg input {
+            height: 60px;
+            border-radius: 30px;
+            padding-left: 30px;
+            padding-right: 140px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            font-size: 1.1rem;
+        }
+
+        .search-box-lg button {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            height: 50px;
+            border-radius: 25px;
+            padding: 0 30px;
+            font-weight: 600;
+        }
+
+        .filter-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            color: #666;
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin: 0 5px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .resource-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .resource-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .resource-title {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .resource-meta {
+            display: flex;
+            gap: 15px;
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .resource-meta i {
+            margin-right: 5px;
+        }
+
+        .badge-custom {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        /* Badges de tipo para coincidir con JS */
+        .badge-codigo { background-color: #e3f2fd; color: #1976d2; }
+        .badge-documentacion { background-color: #e8f5e9; color: #388e3c; }
+        .badge-biblioteca { background-color: #f3e5f5; color: #7b1fa2; }
+        .badge-herramienta { background-color: #fff3e0; color: #f57c00; }
+        .badge-tutorial { background-color: #ffebee; color: #d32f2f; }
+        .badge-otro { background-color: #eceff1; color: #455a64; }
+
+        .btn-download {
+            width: 100%;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-download:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .stats-mini-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stats-mini-card h3 {
+            font-weight: 700;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .no-resources {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+        }
+        
+        .no-resources i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
+                <h3>ResourceHub</h3>
+            </div>
+
+            <ul class="components list-unstyled">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="resources.html">
+                        <i class="fas fa-folder"></i>
+                        Recursos
+                    </a>
+                </li>
+                <li>
+                    <a href="add-resource.html">
+                        <i class="fas fa-plus-circle"></i>
+                        Agregar Recurso
+                    </a>
+                </li>
+                <li>
+                    <a href="statistics.html">
+                        <i class="fas fa-chart-bar"></i>
+                        Estadísticas
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="catalog.html">
+                        <i class="fas fa-eye"></i>
+                        Ver Catálogo Público
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="content">
+            <nav class="navbar">
+                <h4 class="mb-0"><i class="fas fa-globe"></i> Catálogo de Recursos</h4>
+                <div class="ml-auto">
+                    <a href="login.html" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                </div>
+            </nav>
+
+            <div class="container-fluid px-4">
+                <div class="search-hero">
+                    <h2><i class="fas fa-search"></i> Encuentra lo que necesitas</h2>
+                    <p class="mb-0 opacity-75">Explora miles de recursos compartidos por la comunidad de desarrolladores</p>
+                    
+                    <div class="search-box-lg">
+                        <input type="text" id="search-input" placeholder="Buscar librerías, tutoriales, código...">
+                        <button class="btn btn-primary" id="btn-search">
+                            Buscar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="stats-mini-card">
+                            <h3 id="stat-total">0</h3>
+                            <span class="text-muted">Recursos Disponibles</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-mini-card">
+                            <h3 id="stat-tipos">0</h3>
+                            <span class="text-muted">Categorías</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-mini-card">
+                            <h3 id="stat-lenguajes">0</h3>
+                            <span class="text-muted">Lenguajes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="todos">
+                        <i class="fas fa-th-large"></i> Todos
+                    </button>
+                    <button class="filter-btn" data-filter="codigo">
+                        <i class="fas fa-code"></i> Código
+                    </button>
+                    <button class="filter-btn" data-filter="biblioteca">
+                        <i class="fas fa-box"></i> Bibliotecas
+                    </button>
+                    <button class="filter-btn" data-filter="herramienta">
+                        <i class="fas fa-tools"></i> Herramientas
+                    </button>
+                    <button class="filter-btn" data-filter="documentacion">
+                        <i class="fas fa-book"></i> Documentación
+                    </button>
+                    <button class="filter-btn" data-filter="tutorial">
+                        <i class="fas fa-graduation-cap"></i> Tutoriales
+                    </button>
+                </div>
+
+                <div id="resources-container" class="row">
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-3x text-muted"></i>
+                        <p class="mt-3 text-muted">Cargando catálogo...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    
+    <script src="assets/js/catalog.js"></script>
+    
+    <script>
+        // Script simple para logout si el usuario hace clic en el sidebar
+        $(document).ready(function() {
+            $('#btn-logout').on('click', function(e) {
+                e.preventDefault();
+                $.post('backend/auth-logout.php', function() {
+                    window.location.href = 'login.html';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

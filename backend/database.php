@@ -11,7 +11,7 @@
 // =============================================
 $host = 'localhost';
 $user = 'root';
-$password = 'JoshelinLun407';  // Cambiar según tu configuración
+$password = '';  // Cambiar según tu configuración
 $database = 'resourcehub';
 
 // =============================================
