@@ -357,6 +357,21 @@
             });
 
             function handleFile(file) {
+                // Validar tamaño máximo (10MB)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    showError('El archivo excede el tamaño máximo permitido (10MB)');
+                    $('#file-input').val('');
+                    return;
+                }
+                
+                // Validar que no esté vacío
+                if (file.size === 0) {
+                    showError('El archivo está vacío');
+                    $('#file-input').val('');
+                    return;
+                }
+                
                 selectedFile = file;
                 $('#file-name').text(file.name);
                 $('#file-size').text(`(${formatBytes(file.size)})`);
@@ -397,6 +412,7 @@
                     url: 'backend/upload-file.php',
                     type: 'POST',
                     data: formData,
+                    dataType: 'json',
                     processData: false,
                     contentType: false,
                     success: function(uploadResponse) {
@@ -416,6 +432,7 @@
                             $.ajax({
                                 url: 'backend/resource-add.php',
                                 type: 'POST',
+                                dataType: 'json',
                                 contentType: 'application/json',
                                 data: JSON.stringify(recursoData),
                                 success: function(response) {
