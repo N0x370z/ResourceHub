@@ -39,21 +39,18 @@ RewriteRule ^(.*)$ $1 [R=200,L]
 </FilesMatch>
 
 # Permitir acceso a archivos en uploads
-<Directory "uploads">
-    Options -Indexes
-    AllowOverride None
-    Order allow,deny
-    Allow from all
-</Directory>
+# Nota: <Directory> no está permitido en .htaccess, usar RewriteRule en su lugar
+# Las reglas de RewriteRule a continuación manejan el acceso a uploads
 
-# Configuración de PHP
-php_flag display_errors Off
-php_flag log_errors On
-php_value error_log logs/php_error.log
-php_value upload_max_filesize 10M
-php_value post_max_size 10M
-php_value max_execution_time 300
-php_value memory_limit 128M
+# Configuración de PHP (solo funciona si AllowOverride incluye Options)
+# Nota: Estas directivas pueden no funcionar en .htaccess dependiendo de la configuración de Apache
+# php_flag display_errors Off
+# php_flag log_errors On
+# php_value error_log logs/php_error.log
+# php_value upload_max_filesize 10M
+# php_value post_max_size 10M
+# php_value max_execution_time 300
+# php_value memory_limit 128M
 
 # Comprimir archivos para mejor rendimiento
 <IfModule mod_deflate.c>
