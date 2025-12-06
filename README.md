@@ -420,15 +420,21 @@ Revisar la consola del navegador
 
 ## 📝 Licencia
 
-Este proyecto es de código abierto y está disponible bajo la Licencia MIT.
+Este proyecto es de código abierto y está disponible.
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
 
-**Tu Nombre**
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- Email: tu@email.com
+Iván
+David
+Alfonso
+
+- GitHub: 
+N0x370z
+DarvoDev
+sanickg
+
 
 ---
 
@@ -443,7 +449,7 @@ Este proyecto es de código abierto y está disponible bajo la Licencia MIT.
 
 ## 📅 Versión
 
-**v1.0.0** - Diciembre 2024
+**v1.0.0** - Diciembre 2025
 
 ---
 
