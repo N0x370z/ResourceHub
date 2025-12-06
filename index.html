@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResourceHub - Tu Biblioteca de Recursos Digitales</title>
+    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,101.3C1248,85,1344,75,1392,69.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s backwards;
+        }
+
+        .hero-buttons {
+            animation: fadeInUp 1s ease 0.4s backwards;
+        }
+
+        .hero-buttons .btn {
+            margin: 10px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom {
+            background: white;
+            color: #667eea;
+            border: none;
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: #667eea;
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline-custom:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .hero-icon {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .feature-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 80px 0;
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .cta-description {
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer-links {
+            margin-bottom: 20px;
+        }
+
+        .footer-links a {
+            color: white;
+            margin: 0 15px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #667eea;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <div class="hero-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <h1 class="hero-title">ResourceHub</h1>
+                    <p class="hero-subtitle">
+                        Tu biblioteca digital de recursos para programadores. 
+                        Organiza, comparte y accede a todos tus archivos de desarrollo en un solo lugar.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="catalog.html" class="btn btn-primary-custom">
+                            <i class="fas fa-eye"></i> Explorar Catálogo
+                        </a>
+                        <a href="login.html" class="btn btn-outline-custom">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center d-none d-lg-block">
+                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'><rect fill='rgba(255,255,255,0.1)' width='500' height='500' rx='20'/><circle fill='rgba(255,255,255,0.2)' cx='250' cy='150' r='80'/><rect fill='rgba(255,255,255,0.2)' x='100' y='250' width='300' height='40' rx='20'/><rect fill='rgba(255,255,255,0.2)' x='100' y='310' width='300' height='40' rx='20'/><rect fill='rgba(255,255,255,0.2)' x='100' y='370' width='300' height='40' rx='20'/></svg>" 
+                         alt="ResourceHub" style="max-width: 100%; opacity: 0.8;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">¿Por qué ResourceHub?</h2>
+            <p class="section-subtitle">
+                Una solución completa para gestionar tus recursos de desarrollo
+            </p>
+
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Fácil de Usar</h3>
+                        <p class="feature-description">
+                            Sube tus recursos con un simple drag & drop. 
+                            Interfaz intuitiva y moderna que facilita la gestión.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="feature-title">Búsqueda Avanzada</h3>
+                        <p class="feature-description">
+                            Encuentra lo que necesitas al instante. 
+                            Filtra por tipo, lenguaje, tags y más.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="feature-title">Estadísticas</h3>
+                        <p class="feature-description">
+                            Visualiza métricas detalladas con gráficos interactivos. 
+                            Conoce qué recursos son más populares.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Seguro</h3>
+                        <p class="feature-description">
+                            Tus archivos están protegidos con autenticación robusta 
+                            y control de acceso por roles.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <h3 class="feature-title">Organización</h3>
+                        <p class="feature-description">
+                            Categoriza tus recursos con tipos, lenguajes y tags 
+                            personalizados para mejor organización.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="feature-title">Colaborativo</h3>
+                        <p class="feature-description">
+                            Comparte recursos con tu equipo. 
+                            Catálogo público para acceso rápido.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <h2 class="section-title text-white mb-5">ResourceHub en Números</h2>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-resources">0</div>
+                        <div class="stat-label">Recursos Disponibles</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-downloads">0</div>
+                        <div class="stat-label">Descargas Totales</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-languages">0</div>
+                        <div class="stat-label">Lenguajes Soportados</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-types">0</div>
+                        <div class="stat-label">Tipos de Recursos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">¿Listo para empezar?</h2>
+            <p class="cta-description">
+                Únete a ResourceHub y lleva tu gestión de recursos al siguiente nivel
+            </p>
+            <div>
+                <a href="signup.html" class="btn btn-primary btn-lg mr-3">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta Gratis
+                </a>
+                <a href="catalog.html" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-eye"></i> Ver Catálogo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="catalog.html">Catálogo</a>
+                <a href="login.html">Login</a>
+                <a href="signup.html">Registrarse</a>
+                <a href="dashboard.html">Dashboard</a>
+            </div>
+            <div class="social-icons mb-3">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+            <p class="mb-0">&copy; 2024 ResourceHub. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Cargar estadísticas para la landing page
+            $.ajax({
+                url: 'backend/resource-stats.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success' && response.data) {
+                        animateValue('stat-resources', 0, response.data.total_recursos || 0, 2000);
+                        animateValue('stat-languages', 0, Object.keys(response.data.por_lenguaje || {}).length, 2000);
+                        animateValue('stat-types', 0, Object.keys(response.data.por_tipo || {}).length, 2000);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: 'backend/stats-download.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        animateValue('stat-downloads', 0, response.total_descargas || 0, 2000);
+                    }
+                }
+            });
+
+            // Animación de contadores
+            function animateValue(id, start, end, duration) {
+                const obj = document.getElementById(id);
+                if (!obj) return;
+                
+                const range = end - start;
+                const increment = end > start ? 1 : -1;
+                const stepTime = Math.abs(Math.floor(duration / range));
+                let current = start;
+
+                const timer = setInterval(function() {
+                    current += increment;
+                    obj.textContent = current;
+                    if (current === end) {
+                        clearInterval(timer);
+                    }
+                }, stepTime);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Recurso - ResourceHub</title>
+    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: #f5f7fa;
+        }
+
+        .wrapper {
+            display: flex;
+            width: 100%;
+        }
+
+        #sidebar {
+            min-width: 280px;
+            max-width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        #sidebar .sidebar-header {
+            padding: 25px;
+            background: rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        #sidebar ul li a {
+            padding: 15px 25px;
+            display: block;
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+
+        #sidebar ul li a:hover,
+        #sidebar ul li.active > a {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fff;
+        }
+
+        #sidebar ul li a i {
+            margin-right: 12px;
+            width: 20px;
+        }
+
+        #content {
+            width: 100%;
+            padding: 0;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header i {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .file-upload-area:hover {
+            border-color: #764ba2;
+            background: #e9ecef;
+        }
+
+        .file-upload-area.dragover {
+            background: #e9ecef;
+            border-color: #764ba2;
+        }
+
+        .file-upload-area i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 10px;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
+                <h3>ResourceHub</h3>
+            </div>
+
+            <ul class="components list-unstyled">
+                <li>
+                    <a href="dashboard.html">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="resources.html">
+                        <i class="fas fa-folder"></i>
+                        Recursos
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="add-resource.html">
+                        <i class="fas fa-plus-circle"></i>
+                        Agregar Recurso
+                    </a>
+                </li>
+                <li>
+                    <a href="statistics.html">
+                        <i class="fas fa-chart-bar"></i>
+                        Estadísticas
+                    </a>
+                </li>
+                <li>
+                    <a href="catalog.html">
+                        <i class="fas fa-eye"></i>
+                        Ver Catálogo Público
+                    </a>
+                </li>
+                <li>
+                    <a href="#" id="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Cerrar Sesión
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <div id="content">
+            <nav class="navbar">
+                <h4 class="mb-0"><i class="fas fa-plus-circle"></i> Agregar Nuevo Recurso</h4>
+            </nav>
+
+            <div class="container-fluid px-4">
+                <div class="form-container">
+                    <div class="form-header">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h2>Subir Recurso</h2>
+                        <p class="text-muted">Completa el formulario para agregar un nuevo recurso a tu biblioteca</p>
+                    </div>
+
+                    <!-- Alertas -->
+                    <div class="alert alert-danger alert-custom" id="alert-error" style="display:none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="error-message"></span>
+                    </div>
+
+                    <div class="alert alert-success alert-custom" id="alert-success" style="display:none;">
+                        <i class="fas fa-check-circle"></i>
+                        <span id="success-message"></span>
+                    </div>
+
+                    <form id="add-resource-form" enctype="multipart/form-data">
+                        <!-- Área de subida de archivo -->
+                        <div class="form-group">
+                            <label class="required-field">Archivo del Recurso</label>
+                            <div class="file-upload-area" id="file-upload-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h5>Arrastra tu archivo aquí</h5>
+                                <p class="text-muted mb-0">o haz clic para seleccionar</p>
+                                <input type="file" id="file-input" name="archivo" style="display: none;" required>
+                            </div>
+                            <div class="file-info" id="file-info">
+                                <i class="fas fa-file"></i>
+                                <strong id="file-name"></strong>
+                                <span class="text-muted" id="file-size"></span>
+                            </div>
+                        </div>
+
+                        <!-- Título -->
+                        <div class="form-group">
+                            <label class="required-field">Título del Recurso</label>
+                            <input type="text" class="form-control" id="titulo" name="titulo" 
+                                   placeholder="Ej: Librería de Validación de Formularios" required>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" 
+                                      rows="4" placeholder="Describe brevemente tu recurso..."></textarea>
+                        </div>
+
+                        <!-- Tipo y Lenguaje -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="required-field">Tipo de Recurso</label>
+                                    <select class="form-control" id="tipo_recurso" name="tipo_recurso" required>
+                                        <option value="">Selecciona un tipo</option>
+                                        <option value="codigo">Código</option>
+                                        <option value="documentacion">Documentación</option>
+                                        <option value="biblioteca">Biblioteca</option>
+                                        <option value="herramienta">Herramienta</option>
+                                        <option value="tutorial">Tutorial</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Lenguaje de Programación</label>
+                                    <input type="text" class="form-control" id="lenguaje" name="lenguaje" 
+                                           placeholder="Ej: JavaScript, PHP, Python">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="form-group">
+                            <label>Tags (separados por coma)</label>
+                            <input type="text" class="form-control" id="tags" name="tags" 
+                                   placeholder="Ej: javascript, react, frontend">
+                            <small class="form-text text-muted">
+                                Los tags ayudan a encontrar tu recurso más fácilmente
+                            </small>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-submit" id="btn-submit">
+                                <i class="fas fa-upload"></i> Subir Recurso
+                            </button>
+                            <a href="resources.html" class="btn btn-secondary ml-2">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let selectedFile = null;
+
+            // Logout
+            $('#btn-logout').on('click', function(e) {
+                e.preventDefault();
+                $.post('backend/auth-logout.php', function() {
+                    window.location.href = 'login.html';
+                });
+            });
+
+            // Área de subida de archivo
+            const fileUploadArea = $('#file-upload-area');
+            const fileInput = $('#file-input');
+
+            fileUploadArea.on('click', function() {
+                fileInput.click();
+            });
+
+            // Drag and drop
+            fileUploadArea.on('dragover', function(e) {
+                e.preventDefault();
+                $(this).addClass('dragover');
+            });
+
+            fileUploadArea.on('dragleave', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+            });
+
+            fileUploadArea.on('drop', function(e) {
+                e.preventDefault();
+                $(this).removeClass('dragover');
+                
+                const files = e.originalEvent.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                    fileInput[0].files = files;
+                }
+            });
+
+            fileInput.on('change', function() {
+                if (this.files.length > 0) {
+                    handleFile(this.files[0]);
+                }
+            });
+
+            function handleFile(file) {
+                selectedFile = file;
+                $('#file-name').text(file.name);
+                $('#file-size').text(`(${formatBytes(file.size)})`);
+                $('#file-info').addClass('show');
+            }
+
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+
+            // Enviar formulario
+            $('#add-resource-form').on('submit', function(e) {
+                e.preventDefault();
+
+                if (!selectedFile) {
+                    showError('Por favor selecciona un archivo');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('archivo', selectedFile);
+                formData.append('titulo', $('#titulo').val().trim());
+                formData.append('descripcion', $('#descripcion').val().trim());
+                formData.append('tipo_recurso', $('#tipo_recurso').val());
+                formData.append('lenguaje', $('#lenguaje').val().trim());
+                formData.append('tags', $('#tags').val().trim());
+
+                const btn = $('#btn-submit');
+                btn.prop('disabled', true)
+                   .html('<i class="fas fa-spinner fa-spin"></i> Subiendo...');
+
+                // Primero subir el archivo
+                $.ajax({
+                    url: 'backend/upload-file.php',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(uploadResponse) {
+                        if (uploadResponse.status === 'success') {
+                            // Ahora registrar el recurso en la BD
+                            const recursoData = {
+                                titulo: $('#titulo').val().trim(),
+                                descripcion: $('#descripcion').val().trim(),
+                                tipo_recurso: $('#tipo_recurso').val(),
+                                lenguaje: $('#lenguaje').val().trim(),
+                                tags: $('#tags').val().trim(),
+                                archivo_nombre: uploadResponse.data.archivo_nombre,
+                                archivo_ruta: uploadResponse.data.archivo_ruta,
+                                archivo_tamanio: uploadResponse.data.archivo_tamanio
+                            };
+
+                            $.ajax({
+                                url: 'backend/resource-add.php',
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify(recursoData),
+                                success: function(response) {
+                                    if (response.status === 'success') {
+                                        showSuccess('¡Recurso agregado exitosamente!');
+                                        setTimeout(() => {
+                                            window.location.href = 'resources.html';
+                                        }, 2000);
+                                    } else {
+                                        showError(response.message);
+                                        btn.prop('disabled', false)
+                                           .html('<i class="fas fa-upload"></i> Subir Recurso');
+                                    }
+                                },
+                                error: function(xhr) {
+                                    const msg = xhr.responseJSON?.message || 'Error al registrar el recurso';
+                                    showError(msg);
+                                    btn.prop('disabled', false)
+                                       .html('<i class="fas fa-upload"></i> Subir Recurso');
+                                }
+                            });
+                        } else {
+                            showError(uploadResponse.message || 'Error al subir el archivo');
+                            btn.prop('disabled', false)
+                               .html('<i class="fas fa-upload"></i> Subir Recurso');
+                        }
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON?.message || 'Error al subir el archivo';
+                        showError(msg);
+                        btn.prop('disabled', false)
+                           .html('<i class="fas fa-upload"></i> Subir Recurso');
+                    }
+                });
+            });
+
+            function showError(message) {
+                $('#error-message').text(message);
+                $('#alert-error').fadeIn();
+                $('#alert-success').fadeOut();
+                
+                setTimeout(() => {
+                    $('#alert-error').fadeOut();
+                }, 5000);
+            }
+
+            function showSuccess(message) {
+                $('#success-message').text(message);
+                $('#alert-success').fadeIn();
+                $('#alert-error').fadeOut();
+            }
+        });
+    </script>
+</body>
+</html>
