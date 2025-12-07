@@ -15,7 +15,7 @@ require_once __DIR__ . '/DataBase.php';
 class Products extends DataBase {
     private $response;
 
-    public function __construct($db = 'resourcehub', $user = 'root', $pass = 'JoshelinLun407') {
+    public function __construct($db = 'resourcehub', $user = 'root', $pass = '') {
         $this->response = array();
         parent::__construct($db, $user, $pass);
     }

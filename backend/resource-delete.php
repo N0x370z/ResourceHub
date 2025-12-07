@@ -1,30 +1,37 @@
 <?php
 /**
- * ResourceHub - Eliminar Recurso
- * Endpoint para eliminar recursos (eliminación lógica)
- * Método HTTP: DELETE
- * Parámetros: id (query string o body)
+ * ResourceHub - Eliminar Recurso (Corregido JSON)
  */
+
+// 1. Buffer inicial
+ob_start();
 
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/database.php';
 
+// Limpiar basura del include
+if (ob_get_length()) ob_clean();
+
 use ResourceHub\API\Delete\Delete;
 
-// Configurar headers
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Verificar método HTTP
-verificar_metodo('DELETE');
+if ($_SERVER['REQUEST_METHOD'] !== 'DELETE') {
+    if (ob_get_length()) ob_clean();
+    echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
+    exit;
+}
 
-// Requerir autenticación
-requerir_autenticacion();
+if (!esta_autenticado()) {
+    if (ob_get_length()) ob_clean();
+    echo json_encode(['status' => 'error', 'message' => 'No autenticado']);
+    exit;
+}
 
 try {
-    // Obtener ID del recurso (puede venir en query string o body)
     $recurso_id = null;
     
     if (isset($_GET['id'])) {
@@ -38,17 +45,13 @@ try {
     }
     
     if (empty($recurso_id)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'ID del recurso requerido'
-        ], 400);
+        throw new Exception('ID del recurso requerido');
     }
     
-    // Verificar permisos: solo el propietario o admin puede eliminar
     $usuario_id = obtener_usuario_id();
     $es_admin = es_admin();
     
-    // Verificar si el recurso existe y pertenece al usuario (si no es admin)
+    // Validar propiedad
     if (!$es_admin) {
         $sql = "SELECT usuario_id FROM recursos WHERE id = ? AND activo = 1";
         $stmt = $conexion->prepare($sql);
@@ -58,42 +61,31 @@ try {
         
         if ($result->num_rows === 0) {
             $stmt->close();
-            json_response([
-                'status' => 'error',
-                'message' => 'Recurso no encontrado'
-            ], 404);
+            throw new Exception('Recurso no encontrado');
         }
         
         $recurso = $result->fetch_assoc();
         $stmt->close();
         
-        // Verificar que el usuario sea el propietario
         if ($recurso['usuario_id'] != $usuario_id) {
-            json_response([
-                'status' => 'error',
-                'message' => 'No tienes permisos para eliminar este recurso'
-            ], 403);
+            throw new Exception('No tienes permisos para eliminar este recurso');
         }
     }
     
-    // Eliminar el recurso
     $resource = new Delete('resourcehub');
     $resource->delete($recurso_id);
     
     $response = json_decode($resource->getData(), true);
     
-    json_response($response, 200);
-    
 } catch (Exception $e) {
-    json_response([
+    $response = [
         'status' => 'error',
         'message' => 'Error al eliminar recurso: ' . $e->getMessage()
-    ], 500);
+    ];
 }
 
+// 2. Limpieza final crítica
+if (ob_get_length()) ob_clean();
+echo json_encode($response);
 $conexion->close();
 ?>
-
-
-
-
