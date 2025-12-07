@@ -70,7 +70,6 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="index.html">
@@ -110,7 +109,6 @@
         </div>
     </nav>
 
-    <!-- Welcome Banner -->
     <section class="welcome-banner">
         <div class="container">
             <h2><i class="fas fa-folder-open"></i> Mi Catálogo Personal</h2>
@@ -118,7 +116,6 @@
         </div>
     </section>
 
-    <!-- Search and Filters -->
     <div class="container">
         <div class="search-box">
             <div class="input-group">
@@ -157,7 +154,6 @@
             </button>
         </div>
 
-        <!-- Stats -->
         <div class="stats-section">
             <div class="row">
                 <div class="col-md-4">
@@ -181,7 +177,6 @@
             </div>
         </div>
 
-        <!-- Resources Grid -->
         <div class="row" id="resources-container">
             <div class="col-12 text-center" style="padding: 60px 0;">
                 <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i>
@@ -221,12 +216,18 @@
                 });
             }
 
-            // Logout
+            // Logout (CORREGIDO PARA FUNCIONAR SIEMPRE)
             $('#btn-logout').on('click', function(e) {
                 e.preventDefault();
                 if (confirm('¿Estás seguro de cerrar sesión?')) {
-                    $.post('backend/auth-logout.php', function() {
-                        window.location.href = 'index.html';
+                    $.ajax({
+                        url: 'backend/auth-logout.php',
+                        type: 'POST',
+                        // Usamos 'complete' para asegurar que se ejecute siempre
+                        // independientemente de si el servidor devuelve éxito o error
+                        complete: function() {
+                            window.location.href = 'login.html';
+                        }
                     });
                 }
             });
