@@ -1,6 +1,6 @@
 <?php
 /**
- * ResourceHub - Eliminar Recurso (Corregido JSON)
+ * ResourceHub - Eliminar Recurso
  */
 
 // 1. Buffer inicial

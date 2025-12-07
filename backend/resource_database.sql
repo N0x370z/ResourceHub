@@ -1,6 +1,5 @@
 -- =============================================
 -- BASE DE DATOS: ResourceHub
--- Script de instalación
 -- =============================================
 
 -- 1. Crear y usar la base de datos
@@ -20,7 +19,7 @@ CREATE TABLE usuarios (
     INDEX idx_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. Tabla de Recursos (El núcleo del sistema)
+-- 3. Tabla de Recursos 
 DROP TABLE IF EXISTS recursos;
 CREATE TABLE recursos (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +37,7 @@ CREATE TABLE recursos (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Tabla para Bitácora de Acceso (Logins)
+-- 4. Tabla para Bitácora de Acceso
 DROP TABLE IF EXISTS bitacora_acceso;
 CREATE TABLE bitacora_acceso (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,7 +49,7 @@ CREATE TABLE bitacora_acceso (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 5. Tabla para Bitácora de Descargas (Estadísticas)
+-- 5. Tabla para Bitácora de Descargas
 DROP TABLE IF EXISTS bitacora_descargas;
 CREATE TABLE bitacora_descargas (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -65,7 +64,7 @@ CREATE TABLE bitacora_descargas (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- =============================================
--- DATOS INICIALES (SEMILLA)
+-- DATOS INICIALES
 -- =============================================
 
 -- Usuarios por defecto
@@ -74,7 +73,6 @@ INSERT INTO usuarios (nombre, email, password, rol) VALUES
 ('Super Admin', 'admin@resourcehub.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin'),
 ('Usuario Test', 'test@resourcehub.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'usuario');
 
--- Recursos de prueba para que el catálogo no esté vacío
 INSERT INTO recursos (titulo, descripcion, tipo_recurso, lenguaje, archivo_nombre, archivo_ruta, tags, usuario_id) VALUES
 ('Sistema de Login PHP', 'Código base para autenticación de usuarios', 'codigo', 'PHP', 'login-system.zip', 'uploads/login-system.zip', 'auth,login,php', 1),
 ('Guía de Instalación MySQL', 'PDF con pasos para instalar el servidor', 'documentacion', 'SQL', 'manual-mysql.pdf', 'uploads/manual-mysql.pdf', 'mysql,db,guia', 1),
@@ -82,7 +80,7 @@ INSERT INTO recursos (titulo, descripcion, tipo_recurso, lenguaje, archivo_nombr
 ('Postman Portable', 'Herramienta para probar APIs', 'herramienta', 'N/A', 'postman.exe', 'uploads/postman.exe', 'api,testing', 1);
 
 -- =============================================
--- PROCEDIMIENTOS ALMACENADOS (Requerido por backend)
+-- PROCEDIMIENTOS ALMACENADOS
 -- =============================================
 
 DROP PROCEDURE IF EXISTS sp_registrar_descarga;
@@ -95,7 +93,6 @@ CREATE PROCEDURE sp_registrar_descarga(
 BEGIN
     DECLARE v_dia_semana VARCHAR(10);
     
-    -- Calcular día en español
     SET v_dia_semana = CASE DAYOFWEEK(NOW())
         WHEN 1 THEN 'Domingo'
         WHEN 2 THEN 'Lunes'
@@ -112,7 +109,7 @@ END //
 DELIMITER ;
 
 -- =============================================
--- VISTAS (Para reportes futuros)
+-- VISTAS
 -- =============================================
 
 CREATE OR REPLACE VIEW v_estadisticas_generales AS

@@ -1,7 +1,6 @@
 <?php
 /**
  * ResourceHub - Descargar Recurso
- * CORREGIDO: Ahora registra Día y Hora para las estadísticas
  */
 
 ob_start();
@@ -39,7 +38,7 @@ try {
         }
     }
     
-    // --- REGISTRO DE DESCARGA (CORREGIDO PARA GRÁFICAS) ---
+    // --- REGISTRO DE DESCARGA---
     try {
         iniciar_sesion_segura();
         $uid = obtener_usuario_id();
