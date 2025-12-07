@@ -1,59 +1,61 @@
 <?php
 /**
- * ResourceHub - Editar Recurso
- * Endpoint para actualizar recursos existentes
- * Método HTTP: PUT o PATCH
+ * ResourceHub - Editar Recurso (Corregido JSON y N/A)
  */
+
+// 1. Buffer inicial
+ob_start();
 
 require_once __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/database.php';
 
+// Limpiar basura del include
+if (ob_get_length()) ob_clean();
+
 use ResourceHub\API\Update\Update;
 
-// Configurar headers
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: PUT, PATCH');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Verificar método HTTP (aceptar PUT o PATCH)
 $method = $_SERVER['REQUEST_METHOD'];
 if (!in_array($method, ['PUT', 'PATCH'])) {
-    json_response([
-        'status' => 'error',
-        'message' => 'Método HTTP no permitido. Se esperaba PUT o PATCH'
-    ], 405);
+    if (ob_get_length()) ob_clean();
+    echo json_encode(['status' => 'error', 'message' => 'Método no permitido']);
+    exit;
 }
 
-// Requerir autenticación
-requerir_autenticacion();
+// Verificar autenticación
+if (!esta_autenticado()) {
+    if (ob_get_length()) ob_clean();
+    echo json_encode(['status' => 'error', 'message' => 'No autenticado']);
+    exit;
+}
 
 try {
-    // Obtener datos del body
     $input = file_get_contents('php://input');
     $data = json_decode($input);
     
     if (empty($data)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'No se recibieron datos'
-        ], 400);
+        throw new Exception('No se recibieron datos');
     }
     
-    // Validar que venga el ID
     if (!isset($data->id) || empty($data->id)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'ID del recurso requerido'
-        ], 400);
+        throw new Exception('ID del recurso requerido');
     }
+
+    // --- LÓGICA AGREGADA: LENGUAJE POR DEFECTO AL EDITAR ---
+    if (isset($data->lenguaje) && (empty($data->lenguaje) || trim($data->lenguaje) === '')) {
+        $data->lenguaje = 'N/A';
+    }
+    // -------------------------------------------------------
     
-    // Verificar permisos: solo el propietario o admin puede editar
     $recurso_id = (int)$data->id;
     $usuario_id = obtener_usuario_id();
     $es_admin = es_admin();
     
-    // Verificar si el recurso existe y pertenece al usuario (si no es admin)
+    // Validar propiedad
     if (!$es_admin) {
         $sql = "SELECT usuario_id FROM recursos WHERE id = ? AND activo = 1";
         $stmt = $conexion->prepare($sql);
@@ -63,42 +65,31 @@ try {
         
         if ($result->num_rows === 0) {
             $stmt->close();
-            json_response([
-                'status' => 'error',
-                'message' => 'Recurso no encontrado'
-            ], 404);
+            throw new Exception('Recurso no encontrado');
         }
         
         $recurso = $result->fetch_assoc();
         $stmt->close();
         
-        // Verificar que el usuario sea el propietario
         if ($recurso['usuario_id'] != $usuario_id) {
-            json_response([
-                'status' => 'error',
-                'message' => 'No tienes permisos para editar este recurso'
-            ], 403);
+            throw new Exception('No tienes permisos para editar este recurso');
         }
     }
     
-    // Actualizar el recurso
     $resource = new Update('resourcehub');
     $resource->edit($data);
     
     $response = json_decode($resource->getData(), true);
     
-    json_response($response, 200);
-    
 } catch (Exception $e) {
-    json_response([
+    $response = [
         'status' => 'error',
         'message' => 'Error al actualizar recurso: ' . $e->getMessage()
-    ], 500);
+    ];
 }
 
+// 2. Limpieza final crítica
+if (ob_get_length()) ob_clean();
+echo json_encode($response);
 $conexion->close();
 ?>
-
-
-
-

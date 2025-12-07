@@ -1,177 +1,59 @@
 <?php
-/**
- * ResourceHub - Subida de Archivos
- * 
- * Este endpoint maneja la subida de archivos al servidor
- * Método HTTP: POST (multipart/form-data)
- * Parámetros: archivo (file)
- */
 
-require_once __DIR__.'/database.php';
-
-// Requerir autenticación
-requerir_autenticacion();
-
-// Configurar headers
+ob_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
 
-// Verificar método HTTP
-verificar_metodo('POST');
-
-$response = ['status' => 'error', 'message' => 'Error al subir archivo'];
+$response = ['status' => 'error', 'message' => 'Error desconocido'];
 
 try {
-    // Verificar que se haya enviado un archivo
-    if (!isset($_FILES['archivo'])) {
-        json_response([
-            'status' => 'error',
-            'message' => 'No se recibió ningún archivo'
-        ], 400);
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Método no permitido');
     }
 
-    $file = $_FILES['archivo'];
-
-    // Verificar errores de subida
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        $error_messages = [
-            UPLOAD_ERR_INI_SIZE => 'El archivo excede el tamaño máximo permitido por el servidor',
-            UPLOAD_ERR_FORM_SIZE => 'El archivo excede el tamaño máximo permitido',
-            UPLOAD_ERR_PARTIAL => 'El archivo se subió parcialmente',
-            UPLOAD_ERR_NO_FILE => 'No se subió ningún archivo',
-            UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal',
-            UPLOAD_ERR_CANT_WRITE => 'Error al escribir el archivo en disco',
-            UPLOAD_ERR_EXTENSION => 'Una extensión de PHP detuvo la subida'
-        ];
-
-        $error_msg = $error_messages[$file['error']] ?? 'Error desconocido al subir el archivo';
-        json_response(['status' => 'error', 'message' => $error_msg], 400);
+    if (!isset($_FILES['archivo']) || $_FILES['archivo']['error'] !== UPLOAD_ERR_OK) {
+        throw new Exception('No se recibió ningún archivo o hubo un error en la subida');
     }
 
-    // Validar tamaño del archivo (máximo 10MB)
-    $max_size = 10 * 1024 * 1024; // 10MB en bytes
-    if ($file['size'] > $max_size) {
-        json_response([
-            'status' => 'error',
-            'message' => 'El archivo excede el tamaño máximo permitido (10MB)'
-        ], 400);
-    }
-
-    // Validar que el archivo no esté vacío
-    if ($file['size'] === 0) {
-        json_response([
-            'status' => 'error',
-            'message' => 'El archivo está vacío'
-        ], 400);
-    }
-
-    // Obtener información del archivo
-    $nombre_original = $file['name'];
-    $extension = strtolower(pathinfo($nombre_original, PATHINFO_EXTENSION));
+    $uploadDir = __DIR__ . '/../uploads/';
     
-    // Validar que la extensión no esté vacía
-    if (empty($extension)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'El archivo no tiene una extensión válida'
-        ], 400);
-    }
-    
-    // Obtener MIME type de forma segura
-    $mime_type = null;
-    if (function_exists('mime_content_type')) {
-        $mime_type = mime_content_type($file['tmp_name']);
-    } elseif (function_exists('finfo_open')) {
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime_type = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
-    }
-
-    // Lista de extensiones permitidas
-    $extensiones_permitidas = [
-        'php', 'js', 'html', 'css', 'json', 'xml',
-        'txt', 'md', 'pdf', 'doc', 'docx',
-        'zip', 'rar', 'tar', 'gz',
-        'jpg', 'jpeg', 'png', 'gif', 'svg',
-        'sql', 'py', 'java', 'cpp', 'c', 'h',
-        'rb', 'go', 'rs', 'swift', 'kt',
-        'csv', 'xls', 'xlsx'
-    ];
-
-    // Validar extensión
-    if (!in_array($extension, $extensiones_permitidas)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'Tipo de archivo no permitido. Extensión: .' . $extension
-        ], 400);
-    }
-
-    // Crear directorio de uploads si no existe
-    $upload_dir = __DIR__ . '/../uploads/';
-    if (!is_dir($upload_dir)) {
-        if (!mkdir($upload_dir, 0755, true)) {
-            json_response([
-                'status' => 'error',
-                'message' => 'Error al crear el directorio de uploads'
-            ], 500);
+    if (!file_exists($uploadDir)) {
+        if (!mkdir($uploadDir, 0777, true)) {
+            throw new Exception('No se pudo crear el directorio de subidas');
         }
     }
 
-    // Verificar que el directorio tenga permisos de escritura
-    if (!is_writable($upload_dir)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'El directorio de uploads no tiene permisos de escritura'
-        ], 500);
-    }
-
-    // Sanitizar el nombre del archivo
-    $nombre_limpio = preg_replace('/[^a-zA-Z0-9._-]/', '_', pathinfo($nombre_original, PATHINFO_FILENAME));
+    $file = $_FILES['archivo'];
     
-    // Generar nombre único para evitar sobrescrituras
-    $nombre_unico = $nombre_limpio . '_' . uniqid() . '_' . time() . '.' . $extension;
+    // Generar nombre único para evitar sobrescribir
+    $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    $nombreOriginal = pathinfo($file['name'], PATHINFO_FILENAME);
+    // Limpiar nombre de archivo de caracteres raros
+    $nombreLimpio = preg_replace('/[^A-Za-z0-9\-]/', '_', $nombreOriginal);
+    $nuevoNombre = $nombreLimpio . '_' . time() . '.' . $extension;
     
-    // Ruta completa del archivo
-    $ruta_completa = $upload_dir . $nombre_unico;
-    $ruta_relativa = 'uploads/' . $nombre_unico;
+    $destino = $uploadDir . $nuevoNombre;
 
-    // Mover el archivo desde el temporal al destino final
-    if (!move_uploaded_file($file['tmp_name'], $ruta_completa)) {
-        json_response([
-            'status' => 'error',
-            'message' => 'Error al guardar el archivo en el servidor'
-        ], 500);
+    // Mover archivo
+    if (move_uploaded_file($file['tmp_name'], $destino)) {
+        $response = [
+            'status' => 'success',
+            'message' => 'Archivo subido correctamente',
+            'data' => [
+                'archivo_nombre' => $file['name'], // Nombre original para mostrar
+                // Ruta relativa para guardar en BD
+                'archivo_ruta' => 'uploads/' . $nuevoNombre, 
+                'archivo_tamanio' => $file['size']
+            ]
+        ];
+    } else {
+        throw new Exception('Error al mover el archivo al directorio de destino');
     }
-
-    // Establecer permisos del archivo
-    chmod($ruta_completa, 0644);
-
-    // Registrar en bitácora
-    $usuario_id = obtener_usuario_id();
-    registrar_acceso($conexion, $usuario_id, 'upload_archivo');
-
-    // Respuesta exitosa
-    json_response([
-        'status' => 'success',
-        'message' => 'Archivo subido exitosamente',
-        'data' => [
-            'archivo_nombre' => $nombre_original,
-            'archivo_nombre_servidor' => $nombre_unico,
-            'archivo_ruta' => $ruta_relativa,
-            'archivo_tamanio' => $file['size'],
-            'archivo_extension' => $extension,
-            'archivo_tipo_mime' => $mime_type
-        ]
-    ], 200);
 
 } catch (Exception $e) {
-    json_response([
-        'status' => 'error',
-        'message' => 'Error del servidor: ' . $e->getMessage()
-    ], 500);
+    $response = ['status' => 'error', 'message' => $e->getMessage()];
 }
 
-$conexion->close();
+if (ob_get_length()) ob_clean();
+echo json_encode($response);
 ?>
