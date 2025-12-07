@@ -164,7 +164,6 @@
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
@@ -212,9 +211,7 @@
             </ul>
         </nav>
 
-        <!-- Content -->
         <div id="content">
-            <!-- Navbar -->
             <nav class="navbar">
                 <button type="button" id="sidebarCollapse" class="navbar-btn">
                     <i class="fas fa-bars"></i>
@@ -227,15 +224,12 @@
                 </div>
             </nav>
 
-            <!-- Main Content -->
             <div class="container-fluid px-4">
-                <!-- Welcome Banner -->
                 <div class="welcome-banner">
                     <h2>¡Bienvenido de vuelta! 👋</h2>
                     <p class="mb-0">Aquí tienes un resumen de tu biblioteca de recursos</p>
                 </div>
 
-                <!-- Stats Cards -->
                 <div class="row">
                     <div class="col-lg-3 col-md-6">
                         <div class="stats-card blue">
@@ -278,7 +272,6 @@
                     </div>
                 </div>
 
-                <!-- Charts Row 1 -->
                 <div class="row">
                     <div class="col-lg-6">
                         <div class="chart-container">
@@ -295,7 +288,6 @@
                     </div>
                 </div>
 
-                <!-- Charts Row 2 -->
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="chart-container">
@@ -312,17 +304,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Verificar autenticación al inicio
+            $.ajax({
+                url: 'backend/auth-check.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.authenticated) {
+                        $('#user-name').text(response.data.nombre);
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                },
+                error: function() {
+                    window.location.href = 'login.html';
+                }
+            });
+
             // Toggle sidebar
             $('#sidebarCollapse').on('click', function() {
                 $('#sidebar').toggleClass('active');
             });
 
-            // Logout
+            // Logout a prueba de fallos
             $('#btn-logout').on('click', function(e) {
                 e.preventDefault();
                 if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                    $.post('backend/auth-logout.php', function() {
-                        window.location.href = 'login.html';
+                    $.ajax({
+                        url: 'backend/auth-logout.php',
+                        type: 'POST',
+                        // Redirigir SIEMPRE, ya sea éxito o error
+                        complete: function() {
+                            window.location.href = 'login.html';
+                        }
                     });
                 }
             });
@@ -381,21 +395,15 @@
                         datasets: [{
                             data: Object.values(data),
                             backgroundColor: [
-                                '#667eea',
-                                '#11998e',
-                                '#fa709a',
-                                '#feca57',
-                                '#ee5a6f',
-                                '#95a5a6'
+                                '#667eea', '#11998e', '#fa709a',
+                                '#feca57', '#ee5a6f', '#95a5a6'
                             ]
                         }]
                     },
                     options: {
                         responsive: true,
                         plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
+                            legend: { position: 'bottom' }
                         }
                     }
                 });
@@ -415,18 +423,9 @@
                     },
                     options: {
                         responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
                         }
                     }
                 });
@@ -452,18 +451,9 @@
                     },
                     options: {
                         responsive: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
+                        plugins: { legend: { display: false } },
                         scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
                         }
                     }
                 });
