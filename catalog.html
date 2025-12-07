@@ -198,10 +198,10 @@
                         html = `
                             <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                             <li><a href="resources.html"><i class="fas fa-folder"></i> Recursos</a></li>
-                            <li><a href="add-resource.html"><i class="fas fa-plus-circle"></i> Agregar</a></li>
+                            <li><a href="add-resource.html"><i class="fas fa-plus-circle"></i> Agregar Recurso</a></li>
                             <li><a href="statistics.html"><i class="fas fa-chart-bar"></i> Estadísticas</a></li>
-                            <li class="active"><a href="catalog.html"><i class="fas fa-eye"></i> Catálogo</a></li>
-                            <li><a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>`;
+                            <li class="active"><a href="catalog.html"><i class="fas fa-eye"></i>Ver Catálogo Público</a></li>
+                            <li><a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>`;
                         authBtns.html(`<span class="mr-2 text-dark">Hola, ${user.nombre}</span>`);
                     } else {
                         // SI ES USUARIO: NO debe ver "Catálogo Público" en el sidebar, solo "Mi Catálogo"
