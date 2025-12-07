@@ -12,7 +12,6 @@
             overflow-x: hidden;
         }
 
-        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -77,6 +76,7 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             color: #667eea;
+            text-decoration: none;
         }
 
         .btn-outline-custom {
@@ -89,6 +89,7 @@
             background: white;
             color: #667eea;
             transform: translateY(-3px);
+            text-decoration: none;
         }
 
         .hero-icon {
@@ -103,154 +104,32 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Features Section */
-        .features-section {
-            padding: 80px 0;
-            background: #f8f9fa;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: #2c3e50;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 60px;
-        }
-
+        .features-section { padding: 80px 0; background: #f8f9fa; }
+        .section-title { text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; color: #2c3e50; }
+        .section-subtitle { text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 60px; }
         .feature-card {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            margin-bottom: 30px;
-            height: 100%;
+            background: white; padding: 40px 30px; border-radius: 20px; text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s; margin-bottom: 30px; height: 100%;
         }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-        }
-
+        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
         .feature-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
+            font-size: 4rem; margin-bottom: 20px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
         }
+        .feature-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; color: #2c3e50; }
+        .feature-description { color: #666; line-height: 1.6; }
 
-        .feature-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-
-        .feature-description {
-            color: #666;
-            line-height: 1.6;
-        }
-
-        /* Stats Section */
-        .stats-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 80px 0;
-        }
-
-        .stat-box {
-            text-align: center;
-            padding: 30px;
-        }
-
-        .stat-number {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 80px 0;
-            background: #2c3e50;
-            color: white;
-            text-align: center;
-        }
-
-        .cta-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .cta-description {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-
-        /* Footer */
-        .footer {
-            background: #1a1a1a;
-            color: white;
-            padding: 40px 0;
-            text-align: center;
-        }
-
-        .footer-links {
-            margin-bottom: 20px;
-        }
-
-        .footer-links a {
-            color: white;
-            margin: 0 15px;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: #667eea;
-        }
-
-        .social-icons a {
-            color: white;
-            font-size: 1.5rem;
-            margin: 0 10px;
-            transition: color 0.3s;
-        }
-
-        .social-icons a:hover {
-            color: #667eea;
-        }
+        .footer { background: #1a1a1a; color: white; padding: 40px 0; text-align: center; }
+        .footer-links a { color: white; margin: 0 15px; text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: #667eea; }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
             <div class="row align-items-center">
@@ -263,12 +142,9 @@
                         Tu biblioteca digital de recursos para programadores. 
                         Organiza, comparte y accede a todos tus archivos de desarrollo en un solo lugar.
                     </p>
-                    <div class="hero-buttons">
+                    <div class="hero-buttons" id="hero-buttons">
                         <a href="catalog.html" class="btn btn-primary-custom">
-                            <i class="fas fa-eye"></i> Explorar Catálogo
-                        </a>
-                        <a href="login.html" class="btn btn-outline-custom">
-                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                            <i class="fas fa-eye"></i> Ver Catálogo
                         </a>
                     </div>
                 </div>
@@ -280,211 +156,112 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features-section">
         <div class="container">
             <h2 class="section-title">¿Por qué ResourceHub?</h2>
-            <p class="section-subtitle">
-                Una solución completa para gestionar tus recursos de desarrollo
-            </p>
-
             <div class="row">
                 <div class="col-lg-4 col-md-6">
                     <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                         <h3 class="feature-title">Fácil de Usar</h3>
-                        <p class="feature-description">
-                            Sube tus recursos con un simple drag & drop. 
-                            Interfaz intuitiva y moderna que facilita la gestión.
-                        </p>
+                        <p class="feature-description">Sube tus recursos con un simple drag & drop. Interfaz intuitiva.</p>
                     </div>
                 </div>
-
                 <div class="col-lg-4 col-md-6">
                     <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-search"></i></div>
                         <h3 class="feature-title">Búsqueda Avanzada</h3>
-                        <p class="feature-description">
-                            Encuentra lo que necesitas al instante. 
-                            Filtra por tipo, lenguaje, tags y más.
-                        </p>
+                        <p class="feature-description">Encuentra lo que necesitas al instante filtrando por tipo y lenguaje.</p>
                     </div>
                 </div>
-
                 <div class="col-lg-4 col-md-6">
                     <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h3 class="feature-title">Estadísticas</h3>
-                        <p class="feature-description">
-                            Visualiza métricas detalladas con gráficos interactivos. 
-                            Conoce qué recursos son más populares.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h3 class="feature-title">Seguro</h3>
-                        <p class="feature-description">
-                            Tus archivos están protegidos con autenticación robusta 
-                            y control de acceso por roles.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-tags"></i>
-                        </div>
-                        <h3 class="feature-title">Organización</h3>
-                        <p class="feature-description">
-                            Categoriza tus recursos con tipos, lenguajes y tags 
-                            personalizados para mejor organización.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
+                        <div class="feature-icon"><i class="fas fa-users"></i></div>
                         <h3 class="feature-title">Colaborativo</h3>
-                        <p class="feature-description">
-                            Comparte recursos con tu equipo. 
-                            Catálogo público para acceso rápido.
-                        </p>
+                        <p class="feature-description">Comparte recursos con tu equipo mediante el catálogo público.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
-        <div class="container">
-            <h2 class="section-title text-white mb-5">ResourceHub en Números</h2>
-            <div class="row">
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-number" id="stat-resources">0</div>
-                        <div class="stat-label">Recursos Disponibles</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-number" id="stat-downloads">0</div>
-                        <div class="stat-label">Descargas Totales</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-number" id="stat-languages">0</div>
-                        <div class="stat-label">Lenguajes Soportados</div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="stat-box">
-                        <div class="stat-number" id="stat-types">0</div>
-                        <div class="stat-label">Tipos de Recursos</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <h2 class="cta-title">¿Listo para empezar?</h2>
-            <p class="cta-description">
-                Únete a ResourceHub y lleva tu gestión de recursos al siguiente nivel
-            </p>
-            <div>
-                <a href="signup.html" class="btn btn-primary btn-lg mr-3">
-                    <i class="fas fa-user-plus"></i> Crear Cuenta Gratis
-                </a>
-                <a href="catalog.html" class="btn btn-outline-light btn-lg">
-                    <i class="fas fa-eye"></i> Ver Catálogo
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-links">
-                <a href="catalog.html">Catálogo</a>
-                <a href="login.html">Login</a>
-                <a href="signup.html">Registrarse</a>
-                <a href="dashboard.html">Dashboard</a>
-            </div>
-            <div class="social-icons mb-3">
-                <a href="#"><i class="fab fa-github"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
-                <a href="#"><i class="fab fa-linkedin"></i></a>
-            </div>
-            <p class="mb-0">&copy; 2024 ResourceHub. Todos los derechos reservados.</p>
+            <div class="footer-links" id="footer-links">
+                </div>
+            <p class="mb-0 mt-3">&copy; 2024 ResourceHub. Todos los derechos reservados.</p>
         </div>
     </footer>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Cargar estadísticas para la landing page
+            // Verificar autenticación para mostrar los botones correctos
             $.ajax({
-                url: 'backend/resource-stats.php',
+                url: 'backend/auth-check.php',
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    if (response.status === 'success' && response.data) {
-                        animateValue('stat-resources', 0, response.data.total_recursos || 0, 2000);
-                        animateValue('stat-languages', 0, Object.keys(response.data.por_lenguaje || {}).length, 2000);
-                        animateValue('stat-types', 0, Object.keys(response.data.por_tipo || {}).length, 2000);
+                    const btns = $('#hero-buttons');
+                    const footer = $('#footer-links');
+                    
+                    if (response.authenticated && response.data) {
+                        const user = response.data;
+                        
+                        if (user.rol === 'admin') {
+                            // SI ES ADMIN
+                            btns.html(`
+                                <a href="dashboard.html" class="btn btn-primary-custom">
+                                    <i class="fas fa-tachometer-alt"></i> Ir al Dashboard
+                                </a>
+                                <a href="catalog.html" class="btn btn-outline-custom">
+                                    <i class="fas fa-eye"></i> Catálogo Público
+                                </a>
+                            `);
+                            footer.html(`
+                                <a href="catalog.html">Catálogo</a>
+                                <a href="dashboard.html">Dashboard</a>
+                            `);
+                        } else {
+                            // SI ES USUARIO NORMAL
+                            btns.html(`
+                                <a href="user-catalog.html" class="btn btn-primary-custom">
+                                    <i class="fas fa-folder-open"></i> Mi Catálogo
+                                </a>
+                                <a href="catalog.html" class="btn btn-outline-custom">
+                                    <i class="fas fa-eye"></i> Catálogo Público
+                                </a>
+                            `);
+                            footer.html(`
+                                <a href="catalog.html">Catálogo Público</a>
+                                <a href="user-catalog.html">Mi Catálogo</a>
+                            `);
+                        }
+                    } else {
+                        // SI NO ESTÁ LOGUEADO (VISITANTE)
+                        btns.html(`
+                            <a href="catalog.html" class="btn btn-primary-custom">
+                                <i class="fas fa-eye"></i> Ver Catálogo
+                            </a>
+                            <a href="login.html" class="btn btn-outline-custom">
+                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                            </a>
+                        `);
+                        footer.html(`
+                            <a href="catalog.html">Catálogo</a>
+                            <a href="login.html">Login</a>
+                            <a href="signup.html">Registrarse</a>
+                        `);
                     }
+                },
+                error: function() {
+                    // Fallback si falla la conexión
+                    $('#hero-buttons').html(`
+                        <a href="catalog.html" class="btn btn-primary-custom">Ver Catálogo</a>
+                        <a href="login.html" class="btn btn-outline-custom">Login</a>
+                    `);
                 }
             });
-
-            $.ajax({
-                url: 'backend/stats-download.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    if (response.status === 'success') {
-                        animateValue('stat-downloads', 0, response.total_descargas || 0, 2000);
-                    }
-                }
-            });
-
-            // Animación de contadores
-            function animateValue(id, start, end, duration) {
-                const obj = document.getElementById(id);
-                if (!obj) return;
-                
-                const range = end - start;
-                const increment = end > start ? 1 : -1;
-                const stepTime = Math.abs(Math.floor(duration / range));
-                let current = start;
-
-                const timer = setInterval(function() {
-                    current += increment;
-                    obj.textContent = current;
-                    if (current === end) {
-                        clearInterval(timer);
-                    }
-                }, stepTime);
-            }
         });
     </script>
 </body>

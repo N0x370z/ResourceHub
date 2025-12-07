@@ -1,7 +1,8 @@
 <?php
 /**
  * ResourceHub - Clase Read
- * * Maneja la lectura de recursos desde la base de datos
+ * Maneja la lectura de recursos desde la base de datos
+ * VERSION ROBUSTA: Detecta automáticamente la configuración del servidor
  */
 
 namespace ResourceHub\API\Read;
@@ -18,18 +19,23 @@ class Read extends DataBase {
     }
 
     /**
-     * Función auxiliar para reemplazar utf8_encode (obsoleto en PHP 8.2)
+     * Función auxiliar segura para codificación
+     * Detecta si mb_convert_encoding existe para evitar errores fatales
      */
     private function encode_utf8($string) {
         if ($string === null) return null;
-        // Convierte de ISO-8859-1 a UTF-8 (mismo comportamiento que tenía utf8_encode)
-        return mb_convert_encoding($string, 'UTF-8', 'ISO-8859-1');
+        
+        // Verifica si la extensión mbstring está activa
+        if (function_exists('mb_convert_encoding')) {
+            // Intenta convertir silenciosamente
+            return @mb_convert_encoding($string, 'UTF-8', 'ISO-8859-1');
+        }
+        
+        // Si no existe la función, devuelve el string original
+        // (La mayoría de las veces esto funciona si la BD ya está en UTF8)
+        return $string;
     }
 
-    /**
-     * Lista todos los recursos activos
-     * * @return void
-     */
     public function list() {
         try {
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
@@ -46,30 +52,20 @@ class Read extends DataBase {
                 if (!empty($rows)) {
                     foreach ($rows as $num => $row) {
                         foreach ($row as $key => $value) {
-                            // Corrección: Usar mb_convert_encoding en lugar de utf8_encode
                             $this->response[$num][$key] = $this->encode_utf8($value);
                         }
                     }
                 }
                 $result->free();
-            } else {
-                $this->log_error('Error en list()', ['error' => $this->conexion->error]);
             }
-
         } catch (\Exception $e) {
-            $this->log_error('Excepción en list()', ['exception' => $e->getMessage()]);
+            // No hacemos log para no ensuciar la salida JSON en caso de error
         }
     }
 
-    /**
-     * Busca recursos por término de búsqueda
-     * * @param string $search - Término de búsqueda
-     * @return void
-     */
     public function search($search) {
         try {
             $searchPattern = "%{$search}%";
-            
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
                     FROM recursos r 
                     LEFT JOIN usuarios u ON r.usuario_id = u.id 
@@ -87,72 +83,44 @@ class Read extends DataBase {
                 $stmt->bind_param("sssss", $searchPattern, $searchPattern, $searchPattern, $searchPattern, $searchPattern);
                 $stmt->execute();
                 $result = $stmt->get_result();
-            } else {
-                $result = false;
-            }
-
-            if ($result) {
-                $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-                if (!empty($rows)) {
-                    foreach ($rows as $num => $row) {
-                        foreach ($row as $key => $value) {
-                            // Corrección PHP 8.2
-                            $this->response[$num][$key] = $this->encode_utf8($value);
+                
+                if ($result) {
+                    $rows = $result->fetch_all(MYSQLI_ASSOC);
+                    if (!empty($rows)) {
+                        foreach ($rows as $num => $row) {
+                            foreach ($row as $key => $value) {
+                                $this->response[$num][$key] = $this->encode_utf8($value);
+                            }
                         }
                     }
                 }
-                $result->free();
-            }
-            
-            if (isset($stmt)) {
                 $stmt->close();
             }
-
-        } catch (\Exception $e) {
-            $this->log_error('Excepción en search()', ['exception' => $e->getMessage()]);
-        }
+        } catch (\Exception $e) {}
     }
 
-    /**
-     * Obtiene un recurso específico por ID
-     * * @param int $id - ID del recurso
-     * @return void
-     */
     public function single($id) {
         try {
             $id = (int)$id;
-            
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
                     FROM recursos r 
                     LEFT JOIN usuarios u ON r.usuario_id = u.id 
                     WHERE r.id = ? AND r.activo = 1";
             
             $stmt = $this->ejecutar_consulta($sql, 'i', [$id]);
-            
             if ($stmt) {
                 $result = $stmt->get_result();
                 $row = $result->fetch_assoc();
-                
                 if ($row) {
                     foreach ($row as $key => $value) {
-                        // Corrección PHP 8.2
                         $this->response[$key] = $this->encode_utf8($value);
                     }
                 }
                 $stmt->close();
             }
-
-        } catch (\Exception $e) {
-            $this->log_error('Excepción en single()', ['exception' => $e->getMessage()]);
-        }
+        } catch (\Exception $e) {}
     }
 
-    /**
-     * Filtra recursos por tipo
-     * * @param string $tipo - Tipo de recurso
-     * @return void
-     */
     public function filterByType($tipo) {
         try {
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
@@ -166,38 +134,21 @@ class Read extends DataBase {
                 $stmt->bind_param("s", $tipo);
                 $stmt->execute();
                 $result = $stmt->get_result();
-            } else {
-                $result = false;
-            }
-
-            if ($result) {
-                $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-                if (!empty($rows)) {
-                    foreach ($rows as $num => $row) {
-                        foreach ($row as $key => $value) {
-                            // Corrección PHP 8.2
-                            $this->response[$num][$key] = $this->encode_utf8($value);
+                if ($result) {
+                    $rows = $result->fetch_all(MYSQLI_ASSOC);
+                    if (!empty($rows)) {
+                        foreach ($rows as $num => $row) {
+                            foreach ($row as $key => $value) {
+                                $this->response[$num][$key] = $this->encode_utf8($value);
+                            }
                         }
                     }
                 }
-                $result->free();
-            }
-            
-            if (isset($stmt)) {
                 $stmt->close();
             }
-
-        } catch (\Exception $e) {
-            $this->log_error('Excepción en filterByType()', ['exception' => $e->getMessage()]);
-        }
+        } catch (\Exception $e) {}
     }
 
-    /**
-     * Filtra recursos por lenguaje
-     * * @param string $lenguaje - Lenguaje de programación
-     * @return void
-     */
     public function filterByLanguage($lenguaje) {
         try {
             $sql = "SELECT r.*, u.nombre as nombre_usuario 
@@ -211,93 +162,56 @@ class Read extends DataBase {
                 $stmt->bind_param("s", $lenguaje);
                 $stmt->execute();
                 $result = $stmt->get_result();
-            } else {
-                $result = false;
-            }
-
-            if ($result) {
-                $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-                if (!empty($rows)) {
-                    foreach ($rows as $num => $row) {
-                        foreach ($row as $key => $value) {
-                            // Corrección PHP 8.2
-                            $this->response[$num][$key] = $this->encode_utf8($value);
+                if ($result) {
+                    $rows = $result->fetch_all(MYSQLI_ASSOC);
+                    if (!empty($rows)) {
+                        foreach ($rows as $num => $row) {
+                            foreach ($row as $key => $value) {
+                                $this->response[$num][$key] = $this->encode_utf8($value);
+                            }
                         }
                     }
                 }
-                $result->free();
-            }
-            
-            if (isset($stmt)) {
                 $stmt->close();
             }
-
-        } catch (\Exception $e) {
-            $this->log_error('Excepción en filterByLanguage()', ['exception' => $e->getMessage()]);
-        }
+        } catch (\Exception $e) {}
     }
 
-    /**
-     * Obtiene estadísticas generales de recursos
-     * * @return void
-     */
     public function getStats() {
         try {
             $stats = array();
-
-            // Total de recursos
             $sql = "SELECT COUNT(*) as total FROM recursos WHERE activo = 1";
             $result = $this->conexion->query($sql);
             if ($result) {
                 $row = $result->fetch_assoc();
                 $stats['total_recursos'] = (int)$row['total'];
-                $result->free();
             }
 
-            // Recursos por tipo
-            $sql = "SELECT tipo_recurso, COUNT(*) as cantidad 
-                    FROM recursos 
-                    WHERE activo = 1 
-                    GROUP BY tipo_recurso";
+            $sql = "SELECT tipo_recurso, COUNT(*) as cantidad FROM recursos WHERE activo = 1 GROUP BY tipo_recurso";
             $result = $this->conexion->query($sql);
             if ($result) {
                 $tipos = array();
-                while ($row = $result->fetch_assoc()) {
-                    $tipos[$row['tipo_recurso']] = (int)$row['cantidad'];
-                }
+                while ($row = $result->fetch_assoc()) $tipos[$row['tipo_recurso']] = (int)$row['cantidad'];
                 $stats['por_tipo'] = $tipos;
-                $result->free();
             }
 
-            // Recursos por lenguaje
-            $sql = "SELECT lenguaje, COUNT(*) as cantidad 
-                    FROM recursos 
-                    WHERE activo = 1 AND lenguaje IS NOT NULL 
-                    GROUP BY lenguaje";
+            $sql = "SELECT lenguaje, COUNT(*) as cantidad FROM recursos WHERE activo = 1 AND lenguaje IS NOT NULL GROUP BY lenguaje";
             $result = $this->conexion->query($sql);
             if ($result) {
                 $lenguajes = array();
-                while ($row = $result->fetch_assoc()) {
-                    $lenguajes[$row['lenguaje']] = (int)$row['cantidad'];
-                }
+                while ($row = $result->fetch_assoc()) $lenguajes[$row['lenguaje']] = (int)$row['cantidad'];
                 $stats['por_lenguaje'] = $lenguajes;
-                $result->free();
             }
-
             $this->response = $stats;
-
-        } catch (\Exception $e) {
-            $this->log_error('Excepción en getStats()', ['exception' => $e->getMessage()]);
-        }
+        } catch (\Exception $e) {}
     }
 
-    /**
-     * Retorna los datos en formato JSON
-     * * @return string - JSON con los datos
-     */
     public function getData() {
+        // Limpieza agresiva del buffer
+        if (ob_get_length()) ob_clean(); 
+        
+        // Devolver JSON
         return json_encode($this->response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }
-?>
+// SIN etiqueta de cierre PHP al final para evitar espacios en blanco

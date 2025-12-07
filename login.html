@@ -147,6 +147,21 @@
         .signup-link a:hover {
             text-decoration: underline;
         }
+
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .back-link a {
+            color: #999;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link a:hover {
+            color: #667eea;
+        }
         
         .alert-custom {
             border-radius: 10px;
@@ -265,6 +280,12 @@
                         <i class="fas fa-user-plus"></i> Crear una cuenta nueva
                     </a>
                 </div>
+
+                <div class="back-link">
+                    <a href="index.html">
+                        <i class="fas fa-arrow-left"></i> Volver al inicio
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -356,8 +377,13 @@
                     }),
                     success: function(response) {
                         if (response.status === 'success') {
-                            // Redirigir según el rol
-                            window.location.href = response.redirect;
+                            if (response.data && response.data.rol === 'admin') {
+                                // ADMIN -> Dashboard
+                                window.location.href = 'dashboard.html';
+                            } else {
+                                // USUARIO -> Su catálogo privado
+                                window.location.href = 'user-catalog.html';
+                            }
                         } else {
                             showAlert(response.message);
                             btn.prop('disabled', false)

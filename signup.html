@@ -157,6 +157,21 @@
         .login-link a:hover {
             text-decoration: underline;
         }
+
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .back-link a {
+            color: #999;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link a:hover {
+            color: #667eea;
+        }
         
         .alert-custom {
             border-radius: 10px;
@@ -345,6 +360,12 @@
                 <div class="login-link">
                     <a href="login.html">
                         <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+                    </a>
+                </div>
+
+                <div class="back-link">
+                    <a href="index.html">
+                        <i class="fas fa-arrow-left"></i> Volver al inicio
                     </a>
                 </div>
             </div>
@@ -546,7 +567,7 @@
                     data: JSON.stringify(formData),
                     success: function(response) {
                         if (response.status === 'success') {
-                            showSuccess('¡Cuenta creada exitosamente! Redirigiendo...');
+                            showSuccess('¡Cuenta creada exitosamente! Redirigiendo al inicio de sesión...');
                             
                             // Redirigir al login después de 2 segundos
                             setTimeout(() => {
