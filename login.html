@@ -26,7 +26,7 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             border: none;
             overflow: hidden;
-            background: white; /* Fondo blanco explícito */
+            background: white;
         }
         
         .card-header {
@@ -42,16 +42,15 @@
         
         .card-body {
             padding: 40px;
-            color: #333; /* Forzar texto oscuro */
+            color: #333; 
         }
         
         .form-group label {
             font-weight: 600;
-            color: #2c3e50; /* Color oscuro para etiquetas */
+            color: #2c3e50;
             margin-bottom: 8px;
         }
         
-        /* Estilos corregidos para inputs */
         .form-control {
             border-radius: 10px;
             padding: 12px 15px;
@@ -91,7 +90,6 @@
             padding-right: 45px; /* Espacio para el ojo */
         }
         
-        /* Icono del ojo (password toggle) */
         .password-toggle {
             position: absolute;
             right: 15px;
@@ -212,9 +210,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Toggle password
             $('#toggle-password').on('click', function(e) {
-                // Prevenir que el click se propague al input (importante)
                 e.preventDefault();
                 e.stopPropagation();
                 

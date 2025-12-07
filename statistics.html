@@ -360,7 +360,6 @@
                     error: function() { console.log('Error al cargar stats recursos'); }
                 });
 
-                // Cargar estadísticas de descargas
                 $.ajax({
                     url: 'backend/stats-download.php',
                     type: 'GET',
@@ -379,9 +378,7 @@
                 $('#stat-types').text(Object.keys(stats.por_tipo || {}).length);
                 $('#stat-languages').text(Object.keys(stats.por_lenguaje || {}).length);
 
-                // Gráfico por tipo
                 crearGraficoTipo(stats.por_tipo || {});
-                // Gráfico por lenguaje
                 crearGraficoLenguaje(stats.por_lenguaje || {});
             }
 

@@ -6,7 +6,6 @@ $(document).ready(function() {
     let todosLosRecursos = [];
     let filtroActual = 'todos';
     
-    // Variable global para estado de sesión (por defecto false)
     window.isLoggedIn = false;
 
     // Cargar recursos al iniciar
@@ -33,11 +32,8 @@ $(document).ready(function() {
         filtrarRecursos(filtroActual);
     });
 
-    // Función expuesta globalmente para que catalog.html pueda actualizar la vista
-    // cuando termine de verificar la sesión
     window.actualizarEstadoBotones = function(estado) {
         window.isLoggedIn = estado;
-        // Si ya hay recursos cargados, volvemos a renderizar para actualizar botones
         if (todosLosRecursos.length > 0) {
             mostrarRecursos(todosLosRecursos);
         }
@@ -117,7 +113,6 @@ $(document).ready(function() {
             const badgeClass = `badge-${recurso.tipo_recurso}`;
             const tamanio = formatearTamanio(recurso.archivo_tamanio);
             
-            // Lógica del botón de descarga
             let botonDescarga = '';
             if (window.isLoggedIn) {
                 botonDescarga = `
@@ -222,14 +217,12 @@ $(document).ready(function() {
         `);
     }
 
-    // Hacer global la función de descarga
     window.descargarRecurso = function(id) {
         if (!id) {
             console.error('ID de recurso no válido');
             return;
         }
         
-        // Registrar descarga y luego descargar el archivo
         $.ajax({
             url: `backend/resource-download.php?id=${id}`,
             type: 'GET',
