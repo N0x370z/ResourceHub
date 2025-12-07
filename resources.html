@@ -68,6 +68,11 @@
             margin-bottom: 30px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
+        
+        /* CORRECCIÓN DE COLOR DE TEXTO */
+        .resources-header h2 {
+            color: #2c3e50;
+        }
 
         .resource-card {
             background: white;
@@ -81,6 +86,18 @@
         .resource-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Títulos de las tarjetas en oscuro */
+        .resource-card h5 {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        /* Descripciones y textos secundarios en gris oscuro legible */
+        .resource-card p, 
+        .resource-card .text-muted {
+            color: #555 !important;
         }
 
         .resource-icon {
@@ -113,11 +130,22 @@
             font-size: 5rem;
             margin-bottom: 20px;
         }
+        
+        /* Estilos para inputs en fondo blanco */
+        .form-control {
+            color: #333;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+        }
+        
+        .form-control:focus {
+            color: #333;
+            background-color: #fff;
+        }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
@@ -164,19 +192,17 @@
             </ul>
         </nav>
 
-        <!-- Content -->
         <div id="content">
             <nav class="navbar">
-                <h4 class="mb-0"><i class="fas fa-folder"></i> Gestión de Recursos</h4>
+                <h4 class="mb-0" style="color: #333;"><i class="fas fa-folder"></i> Gestión de Recursos</h4>
             </nav>
 
             <div class="container-fluid px-4">
-                <!-- Header con búsqueda -->
                 <div class="resources-header">
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <h2><i class="fas fa-folder-open"></i> Mis Recursos</h2>
-                            <p class="text-muted mb-0">Administra tu biblioteca de recursos</p>
+                            <p class="mb-0" style="color: #666;">Administra tu biblioteca de recursos</p>
                         </div>
                         <div class="col-md-6 text-right">
                             <a href="add-resource.html" class="btn btn-primary">
@@ -211,27 +237,24 @@
                     </div>
                 </div>
 
-                <!-- Lista de recursos -->
                 <div id="resources-container" class="row">
-                    <!-- Los recursos se cargarán aquí dinámicamente -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal para editar recurso -->
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
+                    <h5 class="modal-title" style="color: #333;">
                         <i class="fas fa-edit"></i> Editar Recurso
                     </h5>
                     <button type="button" class="close" data-dismiss="modal">
                         <span>&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body" style="color: #333;">
                     <form id="edit-form">
                         <input type="hidden" id="edit-id">
                         
@@ -294,12 +317,18 @@
             // Cargar recursos
             cargarRecursos();
 
-            // Logout
+            // Logout (Versión a prueba de fallos)
             $('#btn-logout').on('click', function(e) {
                 e.preventDefault();
-                $.post('backend/auth-logout.php', function() {
-                    window.location.href = 'login.html';
-                });
+                if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                    $.ajax({
+                        url: 'backend/auth-logout.php',
+                        type: 'POST',
+                        complete: function() {
+                            window.location.href = 'login.html';
+                        }
+                    });
+                }
             });
 
             // Búsqueda
