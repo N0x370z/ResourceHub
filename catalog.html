@@ -70,8 +70,13 @@
 
         .btn-download { width: 100%; background: #f8f9fa; color: #2c3e50; border: none; padding: 10px; border-radius: 8px; font-weight: 600; }
         .btn-download:hover { background: #667eea; color: white; }
+        .btn-download.disabled-btn { background: #e9ecef; color: #999; cursor: not-allowed; }
+        .btn-download.disabled-btn:hover { background: #e9ecef; color: #999; }
+
         .stats-mini-card { background: white; padding: 15px; border-radius: 10px; text-align: center; }
         .stats-mini-card h3 { font-weight: 700; color: #667eea; margin: 0; }
+        .no-resources { text-align: center; padding: 50px; color: #999; }
+        .no-resources i { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -133,16 +138,24 @@
     
     <script>
         $(document).ready(function() {
-            // Lógica del menú dinámico
+            // Verificar sesión para armar el menú
             $.ajax({
                 url: 'backend/auth-check.php',
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
                     construirMenu(response);
+                    
+                    // AVISAR A catalog.js DEL ESTADO DE SESIÓN PARA HABILITAR/DESHABILITAR DESCARGAS
+                    if (window.actualizarEstadoBotones) {
+                        window.actualizarEstadoBotones(response.authenticated);
+                    }
                 },
                 error: function() {
                     construirMenu({ authenticated: false });
+                    if (window.actualizarEstadoBotones) {
+                        window.actualizarEstadoBotones(false);
+                    }
                 }
             });
 
@@ -153,6 +166,8 @@
 
                 if (authData.authenticated) {
                     const user = authData.data;
+                    
+                    // SI ES ADMIN: Ve todo el panel + el catálogo público
                     if (user.rol === 'admin') {
                         html = `
                             <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
@@ -163,13 +178,14 @@
                             <li><a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>`;
                         authBtns.html(`<span class="mr-2 text-dark">Hola, ${user.nombre}</span>`);
                     } else {
+                        // SI ES USUARIO: NO debe ver "Catálogo Público" en el sidebar, solo "Mi Catálogo"
                         html = `
                             <li><a href="user-catalog.html"><i class="fas fa-folder"></i> Mi Catálogo</a></li>
-                            <li class="active"><a href="catalog.html"><i class="fas fa-eye"></i> Catálogo Público</a></li>
                             <li><a href="#" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</a></li>`;
                         authBtns.html(`<span class="mr-2 text-dark">Hola, ${user.nombre}</span>`);
                     }
                 } else {
+                    // SI ES VISITANTE: Ve Inicio, Catálogo Público y Login
                     html = `
                         <li><a href="index.html"><i class="fas fa-home"></i> Inicio</a></li>
                         <li class="active"><a href="catalog.html"><i class="fas fa-eye"></i> Catálogo</a></li>
@@ -181,7 +197,13 @@
 
                 $('.btn-logout').on('click', function(e) {
                     e.preventDefault();
-                    $.post('backend/auth-logout.php', function() { window.location.href = 'login.html'; });
+                    if(confirm('¿Cerrar sesión?')) {
+                        $.ajax({
+                            url: 'backend/auth-logout.php',
+                            type: 'POST',
+                            complete: function() { window.location.href = 'login.html'; }
+                        });
+                    }
                 });
             }
         });

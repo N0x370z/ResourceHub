@@ -1,132 +1,52 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Catálogo - ResourceHub</title>
-    <link rel="stylesheet" href="https://bootswatch.com/4/superhero/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .navbar-brand { color: white !important; font-weight: 700; font-size: 1.5rem; }
-        .navbar-nav .nav-link { color: rgba(255,255,255,0.9) !important; margin: 0 10px; font-weight: 500; transition: all 0.3s; }
-        .navbar-nav .nav-link:hover { color: white !important; transform: translateY(-2px); }
-        .navbar-nav .nav-link.active { color: white !important; border-bottom: 2px solid white; }
-        .user-info { color: white; display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #667eea; font-weight: 600; }
-        .welcome-banner { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 0; margin-bottom: 30px; }
-        .welcome-banner h2 { font-weight: 700; margin-bottom: 10px; }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg">
-        <div class="container">
-            <a class="navbar-brand" href="index.html"><i class="fas fa-folder-open"></i> ResourceHub</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="fas fa-home"></i> Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="user-catalog.html"><i class="fas fa-folder"></i> Mi Catálogo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="catalog.html"><i class="fas fa-eye"></i> Catálogo Público</a></li>
-                    <li class="nav-item">
-                        <div class="user-info">
-                            <div class="user-avatar" id="user-avatar">U</div>
-                            <span id="user-name">Usuario</span>
-                            <a href="#" id="btn-logout" class="nav-link" style="margin-left: 10px;"><i class="fas fa-sign-out-alt"></i></a>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<?php
+/**
+ * ResourceHub - Cerrar Sesión (Destrucción Total)
+ */
 
-    <section class="welcome-banner">
-        <div class="container">
-            <h2><i class="fas fa-folder-open"></i> Mi Catálogo Personal</h2>
-            <p class="mb-0">Explora y descarga todos los recursos disponibles</p>
-        </div>
-    </section>
+// 1. Iniciar buffer y cargar dependencias
+ob_start();
+require_once __DIR__ . '/database.php';
+if (ob_get_length()) ob_clean();
 
-    <div class="container">
-        <div class="search-box mb-4">
-            <div class="input-group">
-                <input type="text" class="form-control" id="search-input" placeholder="Buscar recursos...">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" id="btn-search"><i class="fas fa-search"></i> Buscar</button>
-                </div>
-            </div>
-        </div>
+// Headers
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
 
-        <div class="filters mb-4">
-            <h5><i class="fas fa-filter"></i> Filtrar por tipo:</h5>
-            <button class="btn btn-sm btn-outline-primary filter-btn active" data-filter="todos">Todos</button>
-            <button class="btn btn-sm btn-outline-primary filter-btn" data-filter="codigo">Código</button>
-            <button class="btn btn-sm btn-outline-primary filter-btn" data-filter="documentacion">Documentación</button>
-            <button class="btn btn-sm btn-outline-primary filter-btn" data-filter="biblioteca">Biblioteca</button>
-            <button class="btn btn-sm btn-outline-primary filter-btn" data-filter="herramienta">Herramienta</button>
-            <button class="btn btn-sm btn-outline-primary filter-btn" data-filter="tutorial">Tutorial</button>
-            <button class="btn btn-sm btn-outline-primary filter-btn" data-filter="otro">Otro</button>
-        </div>
+try {
+    // Necesitamos iniciar la sesión para poder destruirla
+    iniciar_sesion_segura();
+    
+    // 1. Vaciar el array de sesión
+    $_SESSION = array();
 
-        <div class="row mb-4">
-            <div class="col-md-4"><div class="card p-3 text-center"><h3><span id="stat-total">0</span></h3><small>Recursos</small></div></div>
-            <div class="col-md-4"><div class="card p-3 text-center"><h3><span id="stat-tipos">0</span></h3><small>Tipos</small></div></div>
-            <div class="col-md-4"><div class="card p-3 text-center"><h3><span id="stat-lenguajes">0</span></h3><small>Lenguajes</small></div></div>
-        </div>
+    // 2. Borrar la cookie de sesión usando los parámetros EXACTOS
+    // Esto es lo que fallaba: si no coinciden los params, la cookie no se borra
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
 
-        <div class="row" id="resources-container">
-            <div class="col-12 text-center" style="padding: 60px 0;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #667eea;"></i>
-                <p class="mt-3 text-muted">Cargando recursos...</p>
-            </div>
-        </div>
-    </div>
+    // 3. Destruir la sesión en el servidor
+    session_destroy();
+    
+    $response = [
+        'status' => 'success',
+        'message' => 'Sesión destruida correctamente'
+    ];
 
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="assets/js/catalog.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Verificar autenticación
-            $.ajax({
-                url: 'backend/auth-check.php',
-                type: 'GET',
-                dataType: 'json',
-                success: function(response) {
-                    if (!response.authenticated) {
-                        window.location.href = 'login.html';
-                    } else {
-                        const user = response.data;
-                        $('#user-name').text(user.nombre);
-                        $('#user-avatar').text(user.nombre.charAt(0).toUpperCase());
-                    }
-                },
-                error: function() {
-                    window.location.href = 'login.html';
-                }
-            });
+} catch (Exception $e) {
+    // Incluso si falla, el JS forzará la salida
+    $response = [
+        'status' => 'success', 
+        'message' => 'Salida forzada'
+    ];
+}
 
-            // LOGOUT A PRUEBA DE FALLOS (Aquí está el cambio clave)
-            $('#btn-logout').on('click', function(e) {
-                e.preventDefault();
-                if (confirm('¿Estás seguro de cerrar sesión?')) {
-                    $.ajax({
-                        url: 'backend/auth-logout.php',
-                        type: 'POST',
-                        // Usamos 'complete' para que se ejecute SIEMPRE, haya error o éxito
-                        complete: function() {
-                            window.location.href = 'login.html';
-                        }
-                    });
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+// Limpieza final
+if (ob_get_length()) ob_clean();
+echo json_encode($response);
+$conexion->close();
+?>
