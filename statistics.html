@@ -9,6 +9,7 @@
     <style>
         body {
             background: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .wrapper {
@@ -16,6 +17,7 @@
             width: 100%;
         }
 
+        /* Sidebar Styles */
         #sidebar {
             min-width: 280px;
             max-width: 280px;
@@ -60,7 +62,11 @@
             padding: 15px 30px;
             margin-bottom: 30px;
         }
+        
+        /* Título navbar oscuro */
+        .navbar h4 { color: #333; }
 
+        /* Contenedores de Gráficos */
         .chart-container {
             background: white;
             border-radius: 15px;
@@ -69,6 +75,7 @@
             margin-bottom: 30px;
         }
 
+        /* Títulos de gráficos oscuros */
         .chart-container h5 {
             margin-bottom: 20px;
             font-weight: 600;
@@ -82,6 +89,7 @@
             color: #667eea;
         }
 
+        /* Tarjetas de Estadísticas */
         .stats-card {
             background: white;
             border-radius: 15px;
@@ -89,7 +97,10 @@
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
             margin-bottom: 30px;
             text-align: center;
+            transition: transform 0.2s;
         }
+        
+        .stats-card:hover { transform: translateY(-5px); }
 
         .stats-card .icon {
             font-size: 3rem;
@@ -103,31 +114,44 @@
         .stats-card.red .icon { color: #ee5a6f; }
         .stats-card.yellow .icon { color: #feca57; }
 
+        /* Números y etiquetas oscuros */
         .stats-number {
             font-size: 2.5rem;
             font-weight: 700;
             margin: 10px 0;
+            color: #333;
         }
 
         .stats-label {
             color: #666;
             font-size: 1rem;
+            font-weight: 500;
         }
 
+        /* Tabla de Top Recursos */
         .top-resources-table {
             width: 100%;
+            color: #333; /* Texto oscuro para la tabla */
         }
 
         .top-resources-table th {
             background: #f8f9fa;
             padding: 12px;
             text-align: left;
+            color: #2c3e50;
+            font-weight: 700;
+            border-bottom: 2px solid #dee2e6;
         }
 
         .top-resources-table td {
             padding: 12px;
             border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
         }
+        
+        /* Texto dentro de la tabla */
+        .top-resources-table td strong { color: #333; }
+        .top-resources-table td .text-muted { color: #999 !important; }
 
         .badge-custom {
             padding: 5px 10px;
@@ -144,15 +168,11 @@
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
         }
 
-        .page-header h2 {
-            margin: 0;
-            font-weight: 700;
-        }
+        .page-header h2 { margin: 0; font-weight: 700; }
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
                 <i class="fas fa-folder-open" style="font-size: 3rem;"></i>
@@ -160,42 +180,12 @@
             </div>
 
             <ul class="components list-unstyled">
-                <li>
-                    <a href="dashboard.html">
-                        <i class="fas fa-chart-line"></i>
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="resources.html">
-                        <i class="fas fa-folder"></i>
-                        Recursos
-                    </a>
-                </li>
-                <li>
-                    <a href="add-resource.html">
-                        <i class="fas fa-plus-circle"></i>
-                        Agregar Recurso
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="statistics.html">
-                        <i class="fas fa-chart-bar"></i>
-                        Estadísticas
-                    </a>
-                </li>
-                <li>
-                    <a href="catalog.html">
-                        <i class="fas fa-eye"></i>
-                        Ver Catálogo Público
-                    </a>
-                </li>
-                <li>
-                    <a href="#" id="btn-logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Cerrar Sesión
-                    </a>
-                </li>
+                <li><a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="resources.html"><i class="fas fa-folder"></i> Recursos</a></li>
+                <li><a href="add-resource.html"><i class="fas fa-plus-circle"></i> Agregar Recurso</a></li>
+                <li class="active"><a href="statistics.html"><i class="fas fa-chart-bar"></i> Estadísticas</a></li>
+                <li><a href="catalog.html"><i class="fas fa-eye"></i> Ver Catálogo Público</a></li>
+                <li><a href="#" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a></li>
             </ul>
         </nav>
 
@@ -270,7 +260,6 @@
                     </div>
                 </div>
 
-                <!-- Charts Row 2: Descargas -->
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="chart-container">
@@ -339,12 +328,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Logout
+            // LOGOUT BLINDADO (A prueba de fallos)
             $('#btn-logout').on('click', function(e) {
                 e.preventDefault();
-                $.post('backend/auth-logout.php', function() {
-                    window.location.href = 'login.html';
-                });
+                if(confirm('¿Estás seguro de cerrar sesión?')) {
+                    $.ajax({
+                        url: 'backend/auth-logout.php',
+                        type: 'POST',
+                        // Complete asegura redirección aunque haya error en PHP
+                        complete: function() {
+                            window.location.href = 'login.html';
+                        }
+                    });
+                }
             });
 
             // Cargar todas las estadísticas
@@ -360,7 +356,8 @@
                         if (response.status === 'success' && response.data) {
                             mostrarEstadisticasRecursos(response.data);
                         }
-                    }
+                    },
+                    error: function() { console.log('Error al cargar stats recursos'); }
                 });
 
                 // Cargar estadísticas de descargas
@@ -372,7 +369,8 @@
                         if (response.status === 'success') {
                             mostrarEstadisticasDescargas(response);
                         }
-                    }
+                    },
+                    error: function() { console.log('Error al cargar stats descargas'); }
                 });
             }
 
@@ -383,7 +381,6 @@
 
                 // Gráfico por tipo
                 crearGraficoTipo(stats.por_tipo || {});
-                
                 // Gráfico por lenguaje
                 crearGraficoLenguaje(stats.por_lenguaje || {});
             }
@@ -398,16 +395,12 @@
 
                 // Gráfico por día
                 crearGraficoDia(data.por_dia || {});
-                
-                // Gráfico por hora (BONUS)
+                // Gráfico por hora
                 crearGraficoHora(data.por_hora || []);
-                
                 // Descargas por tipo
                 crearGraficoDescargasTipo(data.por_tipo || {});
-                
                 // Descargas por lenguaje
                 crearGraficoDescargasLenguaje(data.por_lenguaje || {});
-
                 // Tabla de top recursos
                 mostrarTopRecursos(data.mas_descargados || []);
             }
@@ -420,18 +413,10 @@
                         labels: Object.keys(data).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
                         datasets: [{
                             data: Object.values(data),
-                            backgroundColor: [
-                                '#667eea', '#11998e', '#fa709a', 
-                                '#feca57', '#ee5a6f', '#95a5a6'
-                            ]
+                            backgroundColor: ['#667eea', '#11998e', '#fa709a', '#feca57', '#ee5a6f', '#95a5a6']
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'bottom' }
-                        }
-                    }
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
                 });
             }
 
@@ -447,15 +432,10 @@
                             backgroundColor: '#667eea'
                         }]
                     },
-                    options: {
-                        responsive: true,
+                    options: { 
+                        responsive: true, 
                         plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                     }
                 });
             }
@@ -481,12 +461,7 @@
                     options: {
                         responsive: true,
                         plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                     }
                 });
             }
@@ -494,6 +469,7 @@
             function crearGraficoHora(data) {
                 const ctx = document.getElementById('chartByHour').getContext('2d');
                 const horas = Array.from({length: 24}, (_, i) => i + ':00');
+                // Si data es array lo usamos, si no (ej. objeto vacío) usamos array de ceros
                 const valores = Array.isArray(data) ? data : Array(24).fill(0);
 
                 new Chart(ctx, {
@@ -509,12 +485,7 @@
                     options: {
                         responsive: true,
                         plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
                     }
                 });
             }
@@ -528,26 +499,21 @@
                         datasets: [{
                             data: Object.values(data),
                             backgroundColor: [
-                                'rgba(102, 126, 234, 0.7)',
-                                'rgba(17, 153, 142, 0.7)',
-                                'rgba(250, 112, 154, 0.7)',
-                                'rgba(254, 202, 87, 0.7)',
-                                'rgba(238, 90, 111, 0.7)',
-                                'rgba(149, 165, 166, 0.7)'
+                                'rgba(102, 126, 234, 0.7)', 'rgba(17, 153, 142, 0.7)', 
+                                'rgba(250, 112, 154, 0.7)', 'rgba(254, 202, 87, 0.7)',
+                                'rgba(238, 90, 111, 0.7)', 'rgba(149, 165, 166, 0.7)'
                             ]
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        plugins: { legend: { position: 'bottom' } }
-                    }
+                    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
                 });
             }
 
             function crearGraficoDescargasLenguaje(data) {
                 const ctx = document.getElementById('chartDownloadsByLanguage').getContext('2d');
                 new Chart(ctx, {
-                    type: 'horizontalBar',
+                    type: 'bar',
+                    indexAxis: 'y', // Barra horizontal
                     data: {
                         labels: Object.keys(data),
                         datasets: [{
@@ -557,15 +523,9 @@
                         }]
                     },
                     options: {
-                        indexAxis: 'y',
                         responsive: true,
                         plugins: { legend: { display: false } },
-                        scales: {
-                            x: {
-                                beginAtZero: true,
-                                ticks: { stepSize: 1 }
-                            }
-                        }
+                        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
                     }
                 });
             }
@@ -574,13 +534,7 @@
                 const tbody = $('#top-resources-body');
                 
                 if (!recursos || recursos.length === 0) {
-                    tbody.html(`
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">
-                                No hay datos disponibles
-                            </td>
-                        </tr>
-                    `);
+                    tbody.html(`<tr><td colspan="5" class="text-center text-muted">No hay datos disponibles</td></tr>`);
                     return;
                 }
 
@@ -603,14 +557,12 @@
                             </td>
                             <td>
                                 <strong class="text-success">
-                                    ${recurso.total_descargas || 0}
-                                    <i class="fas fa-download"></i>
+                                    ${recurso.total_descargas || 0} <i class="fas fa-download"></i>
                                 </strong>
                             </td>
                         </tr>
                     `;
                 });
-                
                 tbody.html(html);
             }
         });
