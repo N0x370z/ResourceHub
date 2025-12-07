@@ -5,6 +5,9 @@
 $(document).ready(function() {
     let todosLosRecursos = [];
     let filtroActual = 'todos';
+    
+    // Variable global para estado de sesión (por defecto false)
+    window.isLoggedIn = false;
 
     // Cargar recursos al iniciar
     cargarRecursos();
@@ -29,6 +32,16 @@ $(document).ready(function() {
         filtroActual = $(this).data('filter');
         filtrarRecursos(filtroActual);
     });
+
+    // Función expuesta globalmente para que catalog.html pueda actualizar la vista
+    // cuando termine de verificar la sesión
+    window.actualizarEstadoBotones = function(estado) {
+        window.isLoggedIn = estado;
+        // Si ya hay recursos cargados, volvemos a renderizar para actualizar botones
+        if (todosLosRecursos.length > 0) {
+            mostrarRecursos(todosLosRecursos);
+        }
+    };
 
     function cargarRecursos() {
         $.ajax({
@@ -104,6 +117,20 @@ $(document).ready(function() {
             const badgeClass = `badge-${recurso.tipo_recurso}`;
             const tamanio = formatearTamanio(recurso.archivo_tamanio);
             
+            // Lógica del botón de descarga
+            let botonDescarga = '';
+            if (window.isLoggedIn) {
+                botonDescarga = `
+                    <button class="btn btn-download" onclick="descargarRecurso(${recurso.id})">
+                        <i class="fas fa-download"></i> Descargar
+                    </button>`;
+            } else {
+                botonDescarga = `
+                    <a href="login.html" class="btn btn-download disabled-btn">
+                        <i class="fas fa-lock"></i> Inicia sesión para descargar
+                    </a>`;
+            }
+            
             html += `
                 <div class="col-md-6">
                     <div class="resource-card">
@@ -128,9 +155,7 @@ $(document).ready(function() {
                             ).join(' ') : ''}
                         </div>
                         
-                        <button class="btn btn-download" onclick="descargarRecurso(${recurso.id})">
-                            <i class="fas fa-download"></i> Descargar
-                        </button>
+                        ${botonDescarga}
                     </div>
                 </div>
             `;
@@ -154,7 +179,6 @@ $(document).ready(function() {
             },
             error: function(xhr, status, error) {
                 console.error('Error al cargar estadísticas:', error);
-                // No mostrar error al usuario, solo dejar valores por defecto
             }
         });
     }
