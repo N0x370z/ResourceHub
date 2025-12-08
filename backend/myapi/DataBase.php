@@ -1,10 +1,4 @@
 <?php
-/**
- * ResourceHub - Clase Base de Conexión a BD
- * 
- * Esta clase abstracta proporciona la conexión base
- * para todas las operaciones CRUD del sistema
- */
 
 namespace ResourceHub\API;
 
@@ -12,9 +6,7 @@ abstract class DataBase {
     protected $conexion;
 
     /**
-     * Constructor - Establece conexión a la base de datos
-     * 
-     * @param string $db Nombre de la base de datos
+     * * @param string $db Nombre de la base de datos
      * @param string $user Usuario de MySQL
      * @param string $pass Contraseña de MySQL
      * @param string $host Host del servidor MySQL
@@ -40,9 +32,6 @@ abstract class DataBase {
         $this->conexion->set_charset("utf8mb4");
     }
 
-    /**
-     * Destructor - Cierra la conexión al destruir el objeto
-     */
     public function __destruct() {
         if ($this->conexion) {
             $this->conexion->close();
@@ -50,9 +39,7 @@ abstract class DataBase {
     }
 
     /**
-     * Escapa caracteres especiales en una cadena para prevenir SQL injection
-     * 
-     * @param string $string Cadena a escapar
+     * * @param string $string Cadena a escapar
      * @return string Cadena escapada
      */
     protected function escape($string) {
@@ -60,12 +47,10 @@ abstract class DataBase {
     }
 
     /**
-     * Ejecuta una consulta preparada de manera segura
-     * 
-     * @param string $sql Consulta SQL con marcadores ?
+     * * @param string $sql Consulta SQL con marcadores ?
      * @param string $types Tipos de datos (i=integer, d=double, s=string, b=blob)
      * @param array $params Parámetros a vincular
-     * @return mysqli_stmt|false
+     * @return \mysqli_stmt|false
      */
     protected function ejecutar_consulta($sql, $types = '', $params = []) {
         $stmt = $this->conexion->prepare($sql);
@@ -102,19 +87,17 @@ abstract class DataBase {
         return $stmt;
     }
 
-
-    @return int
-    
+    /**
+     * @return int
+     */
     protected function ultimo_id() {
         return $this->conexion->insert_id;
     }
 
-    
     protected function iniciar_transaccion() {
         $this->conexion->begin_transaction();
     }
 
-   
     protected function confirmar_transaccion() {
         $this->conexion->commit();
     }
@@ -125,8 +108,7 @@ abstract class DataBase {
 
     /**
      * Verifica si una tabla existe
-     * 
-     * @param string $table Nombre de la tabla
+     * * @param string $table Nombre de la tabla
      * @return bool
      */
     protected function tabla_existe($table) {
@@ -142,8 +124,7 @@ abstract class DataBase {
 
     /**
      * Registra un error en el log del sistema
-     * 
-     * @param string $mensaje Mensaje de error
+     * * @param string $mensaje Mensaje de error
      * @param array $contexto Contexto adicional
      */
     protected function log_error($mensaje, $contexto = []) {
@@ -160,10 +141,7 @@ abstract class DataBase {
     }
 
     /**
-     * Método abstracto que debe implementar cada clase hija
-     * para retornar los datos en formato JSON
-     * 
-     * @return string JSON con los datos
+     * * @return string JSON con los datos
      */
     abstract public function getData();
 }
