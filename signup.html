@@ -70,7 +70,6 @@
         }
         .btn-signup:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); color: white; }
         
-        /* Estilos para botón deshabilitado */
         .btn-signup:disabled {
             background: #ccc;
             cursor: not-allowed;
@@ -194,7 +193,6 @@
                 }
             });
 
-            // Validación simple de contraseña visual
             $('#password').on('keyup', function() {
                 const val = $(this).val();
                 $('#req-length').toggleClass('valid', val.length >= 8).toggleClass('invalid', val.length < 8);
@@ -202,7 +200,6 @@
                 $('#req-number').toggleClass('valid', /[0-9]/.test(val)).toggleClass('invalid', !/[0-9]/.test(val));
             });
 
-            // Lógica para habilitar/deshabilitar el botón según los términos
             $('#terms').on('change', function() {
                 if ($(this).is(':checked')) {
                     $('#btn-signup').prop('disabled', false);
@@ -211,11 +208,9 @@
                 }
             });
 
-            // Submit
             $('#signup-form').on('submit', function(e) {
                 e.preventDefault();
                 
-                // Validación final de contraseñas
                 const data = {
                     nombre: $('#nombre').val(),
                     email: $('#email').val(),
@@ -245,7 +240,6 @@
                         $('#alert-error').addClass('show');
                         const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Error al registrar';
                         $('#error-message').text(msg);
-                        // Si falla, volvemos a habilitar el botón (asumiendo que los términos siguen marcados)
                         btn.prop('disabled', false).html('<i class="fas fa-user-plus"></i> Crear Cuenta');
                         setTimeout(() => $('#alert-error').removeClass('show'), 4000);
                     }
