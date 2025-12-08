@@ -209,7 +209,6 @@
                         const user = response.data;
                         
                         if (user.rol === 'admin') {
-                            // SI ES ADMIN: Ve Dashboard y Catálogo Público
                             btns.html(`
                                 <a href="dashboard.html" class="btn btn-primary-custom">
                                     <i class="fas fa-tachometer-alt"></i> Ir al Dashboard
@@ -223,19 +222,16 @@
                                 <a href="dashboard.html">Dashboard</a>
                             `);
                         } else {
-                            // SI ES USUARIO NORMAL: SOLO ve "Ir a Mi Catálogo"
                             btns.html(`
                                 <a href="user-catalog.html" class="btn btn-primary-custom">
                                     <i class="fas fa-folder-open"></i> Ir a Mi Catálogo
                                 </a>
                             `);
-                            // Footer limpio para usuario
                             footer.html(`
                                 <a href="user-catalog.html">Mi Catálogo</a>
                             `);
                         }
                     } else {
-                        // SI NO ESTÁ LOGUEADO (VISITANTE): Ve opciones de entrada
                         btns.html(`
                             <a href="catalog.html" class="btn btn-primary-custom">
                                 <i class="fas fa-eye"></i> Ver Catálogo
@@ -252,7 +248,6 @@
                     }
                 },
                 error: function() {
-                    // Fallback si falla la conexión (asumimos visitante)
                     $('#hero-buttons').html(`
                         <a href="catalog.html" class="btn btn-primary-custom">Ver Catálogo</a>
                         <a href="login.html" class="btn btn-outline-custom">Login</a>

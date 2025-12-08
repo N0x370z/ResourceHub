@@ -102,32 +102,23 @@ abstract class DataBase {
         return $stmt;
     }
 
-    /**
-     * Obtiene el último ID insertado
-     * 
-     * @return int
-     */
+
+    @return int
+    
     protected function ultimo_id() {
         return $this->conexion->insert_id;
     }
 
-    /**
-     * Inicia una transacción
-     */
+    
     protected function iniciar_transaccion() {
         $this->conexion->begin_transaction();
     }
 
-    /**
-     * Confirma una transacción
-     */
+   
     protected function confirmar_transaccion() {
         $this->conexion->commit();
     }
 
-    /**
-     * Revierte una transacción
-     */
     protected function revertir_transaccion() {
         $this->conexion->rollback();
     }
