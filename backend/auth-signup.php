@@ -109,7 +109,7 @@ try {
     $stmt->close();
 
 } catch (Exception $e) {
-    $response['message'] = 'Error del servidor: ' . $e->getMessage();
+    $response['message'] = 'Error interno del servidor';
     json_response($response, 500);
 }
 

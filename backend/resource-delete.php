@@ -78,9 +78,10 @@ try {
     $response = json_decode($resource->getData(), true);
     
 } catch (Exception $e) {
+    error_log('resource-delete.php: ' . $e->getMessage());
     $response = [
         'status' => 'error',
-        'message' => 'Error al eliminar recurso: ' . $e->getMessage()
+        'message' => 'Error al eliminar recurso'
     ];
 }
 

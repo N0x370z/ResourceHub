@@ -38,12 +38,15 @@ $conexion->set_charset("utf8mb4");
  * Inicia una sesión segura
  */
 function iniciar_sesion_segura() {
-    // Configuración de sesión segura
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_only_cookies', 1);
-    ini_set('session.cookie_secure', 0); // Cambiar a 1 si usas HTTPS
-    
     if (session_status() === PHP_SESSION_NONE) {
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
+
+        // Configuración de sesión segura
+        ini_set('session.cookie_httponly', '1');
+        ini_set('session.use_only_cookies', '1');
+        ini_set('session.cookie_secure', $isHttps ? '1' : '0');
+        ini_set('session.cookie_samesite', 'Lax');
         session_start();
     }
 }
@@ -260,7 +263,6 @@ function validar_archivo($file, $allowed_types = [], $max_size = 10485760) {
 // =============================================
 // CONFIGURACIÓN DE ERRORES (solo para desarrollo)
 // =============================================
-// En producción, comentar estas líneas
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', '0');
 ?>

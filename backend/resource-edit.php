@@ -82,9 +82,10 @@ try {
     $response = json_decode($resource->getData(), true);
     
 } catch (Exception $e) {
+    error_log('resource-edit.php: ' . $e->getMessage());
     $response = [
         'status' => 'error',
-        'message' => 'Error al actualizar recurso: ' . $e->getMessage()
+        'message' => 'Error al actualizar recurso'
     ];
 }
 

@@ -53,9 +53,10 @@ try {
     http_response_code(200); 
 
 } catch (Exception $e) {
+    error_log('resource-add.php: ' . $e->getMessage());
     $response = [
         'status' => 'error',
-        'message' => 'Error al agregar recurso: ' . $e->getMessage()
+        'message' => 'Error al agregar recurso'
     ];
 }
 

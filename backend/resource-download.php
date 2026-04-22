@@ -8,7 +8,6 @@ require_once __DIR__.'/database.php';
 if (ob_get_length()) ob_clean();
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 
 try {
     if (!isset($_GET['id'])) throw new Exception('ID requerido');
@@ -26,16 +25,16 @@ try {
     
     if (!$recurso) throw new Exception('Recurso no encontrado');
     
+    $archivoRuta = (string)$recurso['archivo_ruta'];
+    if (!preg_match('#^uploads/[A-Za-z0-9._-]+$#', $archivoRuta)) {
+        throw new Exception('Ruta de archivo no válida');
+    }
+
     // Ruta física
-    $ruta_fisica = __DIR__ . '/../' . $recurso['archivo_ruta'];
+    $ruta_fisica = __DIR__ . '/../' . $archivoRuta;
     
     if (!file_exists($ruta_fisica)) {
-        $ruta_alternativa = __DIR__ . '/../uploads/' . basename($recurso['archivo_ruta']);
-        if(file_exists($ruta_alternativa)){
-             $recurso['archivo_ruta'] = 'uploads/' . basename($recurso['archivo_ruta']);
-        } else {
-            throw new Exception('El archivo físico no existe en el servidor');
-        }
+        throw new Exception('El archivo físico no existe en el servidor');
     }
     
     // --- REGISTRO DE DESCARGA---
@@ -48,23 +47,19 @@ try {
         $conn2 = new mysqli($host, $user, $password, $database);
         $conn2->set_charset("utf8mb4"); // Importante para los acentos en días
         
-        $usuario_sql = $uid ? $uid : "NULL";
-        
-        // AQUÍ ESTÁ LA MAGIA: 
-        // 1. ELT(DAYOFWEEK...) calcula el día en español basado en la fecha actual
-        // 2. CURTIME() guarda la hora actual
+        // ELT(DAYOFWEEK...) calcula el día en español basado en la fecha actual
         $sql_log = "INSERT INTO bitacora_descargas 
                     (recurso_id, usuario_id, ip_address, fecha_hora, dia_semana, hora_descarga) 
                     VALUES 
-                    ($recurso_id, 
-                     $usuario_sql, 
-                     '$ip', 
-                     NOW(),
+                    (?, ?, ?, NOW(),
                      ELT(DAYOFWEEK(NOW()), 'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'),
-                     CURTIME()
-                    )";
-                    
-        $conn2->query($sql_log);
+                     CURTIME())";
+        $stmtLog = $conn2->prepare($sql_log);
+        if ($stmtLog) {
+            $stmtLog->bind_param('iis', $recurso_id, $uid, $ip);
+            $stmtLog->execute();
+            $stmtLog->close();
+        }
         $conn2->close();
     } catch (Exception $logError) {
         // Fallo silencioso del log para no detener la descarga
@@ -73,7 +68,7 @@ try {
     $response = [
         'status' => 'success',
         'data' => [
-            'archivo_ruta' => $recurso['archivo_ruta'],
+            'archivo_ruta' => $archivoRuta,
             'archivo_nombre' => $recurso['archivo_nombre']
         ]
     ];

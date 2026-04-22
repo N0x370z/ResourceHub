@@ -69,6 +69,7 @@ try {
     // ✅ AUTENTICACIÓN EXITOSA
     // Iniciar sesión
     iniciar_sesion_segura();
+    session_regenerate_id(true);
     
     // Guardar datos en sesión
     $_SESSION['usuario_id'] = $usuario['id'];
@@ -96,7 +97,7 @@ try {
     json_response($response, 200);
 
 } catch (Exception $e) {
-    $response['message'] = 'Error del servidor: ' . $e->getMessage();
+    $response['message'] = 'Error interno del servidor';
     json_response($response, 500);
 }
 
